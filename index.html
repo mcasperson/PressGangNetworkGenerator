@@ -1,0 +1,141 @@
+<html>
+	<head>
+		<script type="application/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+		<script type="application/javascript">
+			
+			finished = function(data) {
+				console.log(JSON.stringify(data));
+			}		
+			
+			getContentSpecs = function(finished) {
+				var contentSpecQueryURL = "http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms/rest/1/contentspecs/get/json/query;logic=And?expand=";
+				var queryExpand = {
+					"branches":[
+						{
+							"trunk":{
+								"name": "contentSpecs"
+							}
+						}
+					]
+				};
+				
+				$.ajax({
+				  dataType: "json",
+				  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
+				  success: function(data) {
+				  	var cspIndex = 0;
+				  	var cspCount = data.items.length;
+				  	var cspData = {};
+				  	getCSPNodesLoop = function () {
+				  		if (cspIndex < cspCount) {
+				  			var csp = data.items[cspIndex];
+				  			++cspIndex;
+				  			cspData[csp.item.id] = [];
+				  			expandContentSpec(csp.item.id, cspData[csp.item.id], getCSPNodesLoop);
+				  		} else {
+				  			finished(cspData);
+				  		}
+				  	}
+				  	
+				  	getCSPNodesLoop();
+				  }
+				});
+			}
+			
+			expandContentSpec = function(id, topics, finished) {
+				var contentSpecURL = "http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms/rest/1/contentspec/get/json/6179?expand=";
+				var contentSpecExpand = {
+					"branches":[
+						{
+							"trunk":{
+								"name": "children_OTM"
+							}
+						}
+					]
+				};
+				
+				$.ajax({
+				  dataType: "json",
+				  url: contentSpecURL + encodeURIComponent(JSON.stringify(contentSpecExpand)),
+				  success: function(data) {
+				  	var nodeIndex = 0;
+				  	var nodeCount = data.children_OTM.items.length;
+				  	getChildNodesLoop = function () {
+				  		if (nodeIndex < nodeCount) {
+				  			var node = data.children_OTM.items[nodeIndex];
+				  			++nodeIndex;
+				  			getChildNodes(node.item.id, topics, getChildNodesLoop);
+				  		} else {
+				  			finished();
+				  		}
+				  	}
+				  	
+				  	getChildNodesLoop();
+				  }
+				});	
+			}
+			
+			getChildNodes = function(nodeId, topics, finished) {
+				var nodeURL = "http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms/rest/1/contentspecnode/get/json/" + nodeId + "?expand=";
+				var nodeExpand = {
+					"branches":[
+						{
+							"trunk":{
+								"name": "children_OTM"
+							}
+						}
+					]
+				};
+				
+				$.ajax({
+				  dataType: "json",
+				  url: nodeURL + encodeURIComponent(JSON.stringify(nodeExpand)),
+				  success: function(data) {
+				  	for (var nodeIndex = 0, nodeCount = data.children_OTM.items.length; nodeIndex < nodeCount; ++nodeIndex) {
+				  		var node = data.children_OTM.items[nodeIndex].item;
+				  		if (node.nodeType == "TOPIC") {
+				  			var found = false;
+				  			for (var topicIndex = 0, topicCount = topics.length; topicIndex < topicCount; ++topicIndex) {
+				  				if (topics[topicIndex] == node.entityId) {
+				  					found = true;
+				  					break;
+				  				}
+				  			}
+				  			
+				  			if (!found) {
+				  				topics.push(node.entityId);
+				  			}
+				  		}
+				  	}
+				  					  	
+				  	var nodeIndex = 0;
+				  	var nodeCount = data.children_OTM.items.length;
+				  	getChildNodesLoop = function () {
+				  		if (nodeIndex < nodeCount) {
+				  			var node = data.children_OTM.items[nodeIndex];
+				  			
+				  			++nodeIndex;
+				  			if (node.item.nodeType != "META_DATA" &&
+				  				node.item.nodeType != "TOPIC") {
+				  				getChildNodes(node.item.id, topics, getChildNodesLoop);
+				  			} else {
+				  				getChildNodesLoop();
+				  			}
+				  		} else {
+				  			finished();
+				  		}
+				  	}
+				  	
+				  	getChildNodesLoop();
+				  	
+				  }
+				});	
+			}
+			
+			getContentSpecs(finished);
+		</script>
+	</head>
+	<body>
+		<textarea id="output"></textarea>
+	</body>
+</html>
