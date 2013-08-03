@@ -43,7 +43,7 @@
 			}
 			
 			expandContentSpec = function(id, topics, finished) {
-				var contentSpecURL = "http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms/rest/1/contentspec/get/json/6179?expand=";
+				var contentSpecURL = "http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms/rest/1/contentspec/get/json/" + id + "?expand=";
 				var contentSpecExpand = {
 					"branches":[
 						{
