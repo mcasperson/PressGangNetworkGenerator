@@ -140,7 +140,8 @@
 
 				for(var csp in data) {
 				    if(data.hasOwnProperty(csp)) {
-				       	script += "var nodeCsp" + csp + " = new Node(nodeCsp" + csp + ");\n";
+				       	script += "var nodeCsp" + csp + " = new Node('nodeCsp" + csp + "');\n";
+						script += "nodeCsp" + csp + ".data.title = 'CSP Node " + csp + "';\n";
 				       	script += "graph.addNode(nodeCsp" + csp + ");\n";
 				       	script += "drawNode(nodeCsp" + csp + ");\n";
 				       
@@ -157,16 +158,19 @@
 				
 				for(var topic in topics) {
 				    if(topics.hasOwnProperty(topic)) {
-				    	script += "var nodeTopic" + topic + " = new Node(nodeTopic" + topic + ");\n";
-				       	script += "graph.addNode(nodeTopic" + topic + ");\n";
-				       	script += "drawNode(nodeTopic" + topic + ");\n";
+				    	script += "var nodeTopic" + topic + " = new Node('nodeTopic" + topic + "');\n";						
+				       	script += "if (graph.addNode(nodeTopic" + topic + ")) {\n";
+						script += "\tnodeTopic" + topic + ".data.title = 'Topic Node " + topic + "';\n";
+				       	script += "\tdrawNode(nodeTopic" + topic + ");\n";
 				       	
 				       	for (var cspindex = 0, cspCount = topics[topic].length; cspindex < cspCount; ++cspindex) {
-							script += "graph.addEdge(nodeCsp" + topics[topic][cspindex] + ", nodeTopic" + topic + ");\n";
-							script += "drawEdge(nodeCsp" + topics[topic][cspindex] + ", nodeTopic" + topic + ");\n";
+							script += "\tif (graph.addEdge(nodeCsp" + topics[topic][cspindex] + ", nodeTopic" + topic + "))\n";
+							script += "\t\tdrawEdge(nodeCsp" + topics[topic][cspindex] + ", nodeTopic" + topic + ");\n";
 				       	}
-				       }
-				    }
+						
+						script += "}\n";
+				   }
+				}
 				
 				output.value = script;
 			}
