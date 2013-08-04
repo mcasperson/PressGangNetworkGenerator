@@ -134,47 +134,41 @@
 			}
 			
 			convertToGraphXML = function(data) {
-				var xml = "<root>\n";
+				var script = "";
 
 				topics = {};
 
 				for(var csp in data) {
 				    if(data.hasOwnProperty(csp)) {
-				       	xml += "<node id='csp" + csp + "'>\n";
-				       	xml += "<title>Content Spec " + csp + "</title>\n";
+				       	script += "var nodeCsp" + csp + " = new Node(nodeCsp" + csp + ");\n";
+				       	script += "graph.addNode(nodeCsp" + csp + ");\n";
+				       	script += "drawNode(nodeCsp" + csp + ");\n";
 				       
-						//for (var topicIndex = 0, topicCount = data[csp].length; topicIndex < topicCount; ++topicIndex) {
-						for (var topicIndex = 0, topicCount = 50; topicIndex < topicCount; ++topicIndex) {
-							xml += "<ref>" + data[csp][topicIndex] + "</ref>\n";
-							
+						for (var topicIndex = 0, topicCount = data[csp].length; topicIndex < topicCount; ++topicIndex) {
+						//for (var topicIndex = 0, topicCount = 50; topicIndex < topicCount; ++topicIndex) {
 							if (data[csp][topicIndex] in topics) {
 								topics[data[csp][topicIndex]].push(csp);
 							} else {
 								topics[data[csp][topicIndex]] = [csp];
 							}
 				       	}
-				       
-				       xml += "</node>\n";
 				    }
 				}
 				
 				for(var topic in topics) {
 				    if(topics.hasOwnProperty(topic)) {
-				    	xml += "<node id='" + topic + "'>\n";
-				       	xml += "<title>Topic " + topic + "</title>\n";
+				    	script += "var nodeTopic" + topic + " = new Node(nodeTopic" + topic + ");\n";
+				       	script += "graph.addNode(nodeTopic" + topic + ");\n";
+				       	script += "drawNode(nodeTopic" + topic + ");\n";
 				       	
 				       	for (var cspindex = 0, cspCount = topics[topic].length; cspindex < cspCount; ++cspindex) {
-							xml += "<ref>csp" + topics[topic][cspindex] + "</ref>\n";
+							script += "graph.addEdge(nodeCsp" + topics[topic][cspindex] + ", nodeTopic" + topic + ");\n";
+							script += "drawEdge(nodeCsp" + topics[topic][cspindex] + ", nodeTopic" + topic + ");\n";
 				       	}
-				       	
-				       	xml += "</node>\n";
 				       }
 				    }
 				
-				
-				xml += "</root>\n";
-				
-				output.value = xml;
+				output.value = script;
 			}
 			
 			$(document).ready(function(){convertToGraphXML(JSON.parse(testData)); });
@@ -186,6 +180,6 @@
 		</script>
 	</head>
 	<body>
-		<textarea id="output"></textarea>
+		<textarea rows="30" cols="100" id="output"></textarea>
 	</body>
 </html>
