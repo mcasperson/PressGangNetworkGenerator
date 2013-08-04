@@ -134,17 +134,17 @@
 			}
 			
 			convertToGraphXML = function(data) {
-				var xml = "<root>";
+				var xml = "<root>\n";
 
 				topics = {};
 
 				for(var csp in data) {
 				    if(data.hasOwnProperty(csp)) {
-				       	xml += "<node id='csp" + csp + "'>";
-				       	xml += "<title>Content Spec " + csp + "</title>";
+				       	xml += "<node id='csp" + csp + "'>\n";
+				       	xml += "<title>Content Spec " + csp + "</title>\n";
 				       
 						for (var topicIndex = 0, topicCount = data[csp].length; topicIndex < topicCount; ++topicIndex) {
-							xml += "<ref>" + data[csp][topicIndex] + "</ref>";
+							xml += "<ref>" + data[csp][topicIndex] + "</ref>\n";
 							
 							if (data[csp][topicIndex] in topics) {
 								topics[data[csp][topicIndex]].push(csp);
@@ -153,25 +153,25 @@
 							}
 				       	}
 				       
-				       xml += "</node>";
+				       xml += "</node>\n";
 				    }
 				}
 				
 				for(var topic in topics) {
 				    if(topics.hasOwnProperty(topic)) {
-				    	xml += "<node id='" + topic + "'>";
-				       	xml += "<title>Topic " + topic + "</title>";
+				    	xml += "<node id='" + topic + "'>\n";
+				       	xml += "<title>Topic " + topic + "</title>\n";
 				       	
-				       	for (var cspindex = 0, cspCount = topics[topic].length; cspindex < topicCount; ++cspindex) {
-							xml += "<ref>csp" + topics[topic][cspindex] + "</ref>";
+				       	for (var cspindex = 0, cspCount = topics[topic].length; cspindex < cspCount; ++cspindex) {
+							xml += "<ref>csp" + topics[topic][cspindex] + "</ref>\n";
 				       	}
 				       	
-				       	xml += "</node>";
+				       	xml += "</node>\n";
 				       }
 				    }
 				
 				
-				xml += "</root>";
+				xml += "</root>\n";
 				
 				output.value = xml;
 			}
