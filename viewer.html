@@ -36,10 +36,28 @@
 				bottom: 8px;
 				overflow-y: scroll;
 			}
+			
+			.filter {
+				position: absolute;
+				right: 8px;
+				top: 40px;
+			}
+			
+			.reset {
+				position: absolute;
+				right: 8px;
+				top: 8px;
+			}
 
 		</style>
 	</head>
 	<body>
+		<button type="button" class="reset" onclick="controls.reset()">Reset</button>
+		<select class="filter">
+			<option>More than 2 Products</option>
+			<option>More than 3 Products</option>
+			<option>More than 5 Products</option>
+		</select>
 		<div id="table" class="productTable"></div>
 		<div id="container"></div>
 		<script src="three.min.js"></script>
@@ -105,6 +123,10 @@
 			
 			var topics = [];
 			
+			var filteredTopics;
+			
+			var particleSystem;
+			
 			$.ajax({
 			  dataType: "text",
 			  url: "topics.lay",
@@ -117,7 +139,9 @@
 							topics.push({id: Number(topicDetails[5]), x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
 						}
 					}
-				}				
+				}
+
+				filteredTopics = topics;
 				
 				init();
 				animate();
@@ -127,8 +151,6 @@
 			function init() {
 
 				container = document.getElementById( 'container' );
-
-				//
 
 				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 100000 );
 				camera.position.z = 7500;
@@ -152,7 +174,7 @@
 	
 				};				
 				
-				var shaderMaterial = new THREE.ShaderMaterial( {
+				shaderMaterial = new THREE.ShaderMaterial( {
 
 					uniforms: 		uniforms,
 					attributes:     attributes,
@@ -165,11 +187,25 @@
 	
 				});
 				
-				var particleCount = topics.length;
+				createParticles();
+
+				renderer = new THREE.WebGLRenderer( { antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false } );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0, 1 );
+
+				container.appendChild( renderer.domElement );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+			
+			function createParticles() {
+				var particleCount = filteredTopics.length;
 				
 				// Assign colours to products
 				var table = document.getElementById("table");
-				extraData.productColors = {};
+				table.innerHTML = '';
+				
+				var productColors = {};
 				var majorColor = 32;
 				var minorColor = 1;
 				for (var productIndex = 0, productCount = extraData.products.length; productIndex < productCount; ++productIndex) {
@@ -185,7 +221,7 @@
 							colour.setRGB(Math.random() * minorColor, Math.random() * majorColor, Math.random() * minorColor);
 						}
 						
-						extraData.productColors[extraData.products[productIndex]] = colour;
+						productColors[extraData.products[productIndex]] = colour;
 						var tableChild = document.createElement("div");
 						tableChild.innerText = extraData.products[productIndex];
 						tableChild.style.color = colour.getStyle();
@@ -200,31 +236,35 @@
 				// now create the individual particles
 				for(var p = 0; p < particleCount; p++) {
 
-					var pX = topics[p].x,
-						pY = topics[p].y,
-						pZ = topics[p].z,
+					var pX = filteredTopics[p].x,
+						pY = filteredTopics[p].y,
+						pZ = filteredTopics[p].z,
 						particle = new THREE.Vector3(pX, pY, pZ);
 					  
-					values_size[ p ] = 50 + (10 * topics[p].size);
-					//values_size[ p ] = 50 * (extraData[topics[p].id] ? extraData[topics[p].id].products.length - 1 : 0);
+					values_size[ p ] = 50 + (10 * filteredTopics[p].size);
+					//values_size[ p ] = 50 * (extraData[filteredTopics[p].id] ? extraData[filteredTopics[p].id].products.length - 1 : 0);
 					
 					var r = 0, g = 0, b = 0;
 
-					if (extraData[topics[p].id]) {
-						var products = extraData[topics[p].id].products;
+					if (extraData[filteredTopics[p].id]) {
+						var products = extraData[filteredTopics[p].id].products;
 						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
-							r += extraData.productColors[products[topicProductIndex]].r;
-							g += extraData.productColors[products[topicProductIndex]].g;
-							b += extraData.productColors[products[topicProductIndex]].b;
+							r += productColors[products[topicProductIndex]].r;
+							g += productColors[products[topicProductIndex]].g;
+							b += productColors[products[topicProductIndex]].b;
 						}
 					}
 					
 					values_color[ p ] = new THREE.Color();
 					values_color[ p ].setRGB(r / topicProductCount, g / topicProductCount, b / topicProductCount);
-					//values_color[ p ].setRGB(32, 32, 32);
 
 					// add it to the geometry
 					particles.vertices.push(particle);
+				}
+				
+				if (particleSystem != null) {
+					scene.remove(particleSystem);
+					particleSystem = null;
 				}
 				
 				// create the particle system
@@ -235,18 +275,6 @@
 				
 				// add it to the scene
 				scene.add(particleSystem);
-
-				//
-
-				renderer = new THREE.WebGLRenderer( { antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false } );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.setClearColor( 0, 1 );
-
-				container.appendChild( renderer.domElement );
-
-				//
-
-				window.addEventListener( 'resize', onWindowResize, false );
 			}
 			
 			function setupControls() {
