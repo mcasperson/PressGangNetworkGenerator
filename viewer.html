@@ -58,7 +58,7 @@
 					if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
 						var topicDetails = lines[lineIndex].split("\t");
 						if (topicDetails.length == 8) {
-							topics.push({x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3])});
+							topics.push({x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
 						}
 					}
 				}				
@@ -86,7 +86,10 @@
 				    pMaterial =
 				      new THREE.ParticleBasicMaterial({
 				        color: 0xFFFFFF,
-				        size: 20
+				        size: 20,
+				        map: THREE.ImageUtils.loadTexture("particle.png"),
+				        blending: THREE.AdditiveBlending,
+				        transparent: true
 				      });
 				
 				// now create the individual particles
@@ -108,6 +111,8 @@
 				  new THREE.ParticleSystem(
 				    particles,
 				    pMaterial);
+				    
+				particleSystem.sortParticles = true;
 				
 				// add it to the scene
 				scene.add(particleSystem);
