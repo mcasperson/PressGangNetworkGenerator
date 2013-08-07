@@ -106,7 +106,7 @@
 					if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
 						var topicDetails = lines[lineIndex].split("\t");
 						if (topicDetails.length == 8) {
-							topics.push({x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+							topics.push({id: Number(topicDetails[5]), x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
 						}
 					}
 				}				
@@ -157,24 +157,42 @@
 	
 				});
 				
+				var particleCount = topics.length;
+				
 				// Assign colours to products
-				var colours = {};
-				for (var topicIndex
+				extraData.productColors = {};
+				for (var productIndex = 0, productCount = extraData.products.length; productIndex < productCount; ++productIndex) {
+						extraData.productColors[extraData.products[productIndex]] = new Three.Color(Math.random() * 32, Math.random() * 32, Math.random() * 32);
+				}
 
 				// create the particle variables
-				var particleCount = topics.length,
-				    particles = new THREE.Geometry();
+				var particles = new THREE.Geometry();
+				var values_size = attributes.size.value;
+				var values_color = attributes.customColor.value;
 				    
 				// now create the individual particles
 				for(var p = 0; p < particleCount; p++) {
 
-				  var pX = topics[p].x,
-				      pY = topics[p].y,
-				      pZ = topics[p].z,
-				      particle = new THREE.Vector3(pX, pY, pZ);
-				
-				  // add it to the geometry
-				  particles.vertices.push(particle);
+					var pX = topics[p].x,
+						pY = topics[p].y,
+						pZ = topics[p].z,
+						particle = new THREE.Vector3(pX, pY, pZ);
+					  
+					values_size[ p ] = 50 + topics[p].size;
+					
+					var r = 0, g = 0, b = 0;
+
+					for (var topicProductIndex = 0, topicProductCount = extraData[topics[p].id].products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
+						r += extraData.productColors[extraData[topics[p].id].products[topicProductIndex]].r;
+						g += extraData.productColors[extraData[topics[p].id].products[topicProductIndex]].g;
+						b += extraData.productColors[extraData[topics[p].id].products[topicProductIndex]].b;
+					}
+					
+					values_color[ p ] = new THREE.Color();
+					values_color[ p ].setRGB(r / topicProductCount, g / topicProductCount, b / topicProductCount);
+
+					// add it to the geometry
+					particles.vertices.push(particle);
 				}
 				
 				// create the particle system
@@ -182,18 +200,6 @@
 				  new THREE.ParticleSystem(
 				    particles,
 				    shaderMaterial);
-				    
-				//particleSystem.sortParticles = true;
-				
-				var values_size = attributes.size.value;
-				var values_color = attributes.customColor.value;
-	
-	
-				for( var v = 0; v < particleCount; v++ ) {							
-					values_size[ v ] = 50 + topics[v].size;
-					values_color[ v ] = new THREE.Color();
-					values_color[ v ].setRGB(Math.random() * 32, Math.random() * 32, Math.random() * 32);
-				}
 				
 				// add it to the scene
 				scene.add(particleSystem);
