@@ -161,8 +161,23 @@
 				
 				// Assign colours to products
 				extraData.productColors = {};
+				var majorColor = 32;
+				var minorColor = 2;
 				for (var productIndex = 0, productCount = extraData.products.length; productIndex < productCount; ++productIndex) {
-						extraData.productColors[extraData.products[productIndex]] = new Three.Color(Math.random() * 32, Math.random() * 32, Math.random() * 32);
+						
+						var colour = new THREE.Color();
+						var random = Math.random();
+						
+						if (random < 0.3) {
+							colour.setRGB(Math.random() * majorColor, Math.random() * minorColor, Math.random() * minorColor);
+						} else if (random > 0.6) {
+							colour.setRGB(Math.random() * minorColor, Math.random() * minorColor, Math.random() * majorColor);
+						} else {
+							colour.setRGB(Math.random() * minorColor, Math.random() * majorColor, Math.random() * minorColor);
+						}
+						
+						extraData.productColors[extraData.products[productIndex]] = colour;
+						
 				}
 
 				// create the particle variables
@@ -178,18 +193,22 @@
 						pZ = topics[p].z,
 						particle = new THREE.Vector3(pX, pY, pZ);
 					  
-					values_size[ p ] = 50 + topics[p].size;
+					values_size[ p ] = 50 + (10 * topics[p].size);
 					
 					var r = 0, g = 0, b = 0;
 
-					for (var topicProductIndex = 0, topicProductCount = extraData[topics[p].id].products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
-						r += extraData.productColors[extraData[topics[p].id].products[topicProductIndex]].r;
-						g += extraData.productColors[extraData[topics[p].id].products[topicProductIndex]].g;
-						b += extraData.productColors[extraData[topics[p].id].products[topicProductIndex]].b;
+					if (extraData[topics[p].id]) {
+						var products = extraData[topics[p].id].products;
+						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
+							r += extraData.productColors[products[topicProductIndex]].r;
+							g += extraData.productColors[products[topicProductIndex]].g;
+							b += extraData.productColors[products[topicProductIndex]].b;
+						}
 					}
 					
 					values_color[ p ] = new THREE.Color();
 					values_color[ p ].setRGB(r / topicProductCount, g / topicProductCount, b / topicProductCount);
+					//values_color[ p ].setRGB(32, 32, 32);
 
 					// add it to the geometry
 					particles.vertices.push(particle);
