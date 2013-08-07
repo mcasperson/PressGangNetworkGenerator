@@ -36,6 +36,45 @@
 		<div id="container"></div>
 		<script src="three.min.js"></script>
 		<script src="Detector.js"></script>
+		
+		<script type="x-shader/x-vertex" id="vertexshader">
+
+			uniform float amplitude;
+			attribute float size;
+			attribute vec3 customColor;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				vColor = customColor;
+
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+				//gl_PointSize = size;
+				gl_PointSize = size * ( 300.0 / length( mvPosition.xyz ) );
+
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+		</script>
+		
+		<script type="x-shader/x-fragment" id="fragmentshader">
+
+			uniform vec3 color;
+			uniform sampler2D texture;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				gl_FragColor = vec4( color * vColor, 1.0 );
+				gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+
+			}
+
+		</script>
 
 		<script>
 			/*
@@ -86,24 +125,42 @@
 
 				scene = new THREE.Scene();
 				scene.fog = new THREE.Fog( 0x050505, 2000, 7500 );
+				
+				attributes = {
+	
+					size: {	type: 'f', value: [] },
+					customColor: { type: 'c', value: [] }
+	
+				};
+	
+				uniforms = {
+	
+					amplitude: { type: "f", value: 1.0 },
+					color:     { type: "c", value: new THREE.Color( 0xffffff ) },
+					texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "particle.png" ) },
+	
+				};				
+				
+				var shaderMaterial = new THREE.ShaderMaterial( {
+
+					uniforms: 		uniforms,
+					attributes:     attributes,
+					vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+	
+					blending: 		THREE.AdditiveBlending,
+					depthTest: 		false,
+					transparent:	true
+	
+				});
 
 				// create the particle variables
 				var particleCount = topics.length,
-				    particles = new THREE.Geometry(),
-				    pMaterial =
-				      new THREE.ParticleBasicMaterial({
-				        color: 0xFFFFFF,
-				        size: 100,
-				        map: THREE.ImageUtils.loadTexture("particle.png"),
-				        blending: THREE.AdditiveBlending,
-				        transparent: true
-				      });
-				
+				    particles = new THREE.Geometry();
+				    
 				// now create the individual particles
 				for(var p = 0; p < particleCount; p++) {
-				
-				  // create a particle with random
-				  // position values, -250 -> 250
+
 				  var pX = topics[p].x,
 				      pY = topics[p].y,
 				      pZ = topics[p].z,
@@ -117,9 +174,18 @@
 				particleSystem =
 				  new THREE.ParticleSystem(
 				    particles,
-				    pMaterial);
+				    shaderMaterial);
 				    
 				particleSystem.sortParticles = true;
+				
+				var values_size = attributes.size.value;
+				var values_color = attributes.customColor.value;
+	
+	
+				for( var v = 0; v < vertices.particleCount; v++ ) {							
+					values_size[ v ] = 50;
+					values_color[ v ] = new THREE.Color( 0xffaa00 );
+				}
 				
 				// add it to the scene
 				scene.add(particleSystem);
