@@ -123,7 +123,7 @@
 				//
 
 				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 100000 );
-				camera.position.z = 10000;
+				camera.position.z = 7500;
 				
 				setupControls();
 
@@ -186,9 +186,8 @@
 	
 	
 				for( var v = 0; v < particleCount; v++ ) {							
-					values_size[ v ] = 50 + (10 * topics[v].size);
+					values_size[ v ] = 50 + topics[v].size;
 					values_color[ v ] = new THREE.Color();
-					//values_color[ v ].setHSL(Math.random() * 255, 1, 0.5);
 					values_color[ v ].setRGB(1, 1, 1);
 				}
 				
