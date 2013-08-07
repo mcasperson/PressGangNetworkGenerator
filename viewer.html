@@ -184,7 +184,7 @@
 	
 	
 				for( var v = 0; v < particleCount; v++ ) {							
-					values_size[ v ] = topics[v].size;
+					values_size[ v ] = 25 * topics[v].size;
 					values_color[ v ] = new THREE.Color();
 					values_color[ v ].setHSL(Math.random() * 255, 1, 0.5);
 				}
