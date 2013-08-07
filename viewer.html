@@ -28,11 +28,19 @@
 
 				color: #0080ff;
 			}
+			
+			.productTable {
+				position: absolute;
+				top: 8px;
+				left: 8px;
+				bottom: 8px;
+				overflow-y: scroll;
+			}
 
 		</style>
 	</head>
 	<body>
-
+		<div id="table" class="productTable"></div>
 		<div id="container"></div>
 		<script src="three.min.js"></script>
 		<script src="Detector.js"></script>
@@ -85,7 +93,7 @@
 			 * Run this page locally using:
 			 * chrome --allow-file-access-from-files
 			 */
-
+			
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
@@ -160,6 +168,7 @@
 				var particleCount = topics.length;
 				
 				// Assign colours to products
+				var table = document.getElementById("table");
 				extraData.productColors = {};
 				var majorColor = 32;
 				var minorColor = 1;
@@ -177,7 +186,10 @@
 						}
 						
 						extraData.productColors[extraData.products[productIndex]] = colour;
-						
+						var tableChild = document.createElement("div");
+						tableChild.innerText = extraData.products[productIndex];
+						tableChild.style.color = colour.getStyle();
+						table.appendChild(tableChild);
 				}
 
 				// create the particle variables
@@ -194,6 +206,7 @@
 						particle = new THREE.Vector3(pX, pY, pZ);
 					  
 					values_size[ p ] = 50 + (10 * topics[p].size);
+					//values_size[ p ] = 50 * (extraData[topics[p].id] ? extraData[topics[p].id].products.length - 1 : 0);
 					
 					var r = 0, g = 0, b = 0;
 
