@@ -149,7 +149,7 @@
 					fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 	
 					blending: 		THREE.AdditiveBlending,
-					depthTest: 		true,
+					depthTest: 		false,
 					transparent:	true
 	
 				});
@@ -176,7 +176,7 @@
 				    particles,
 				    shaderMaterial);
 				    
-				particleSystem.sortParticles = true;
+				//particleSystem.sortParticles = true;
 				
 				var values_size = attributes.size.value;
 				var values_color = attributes.customColor.value;
