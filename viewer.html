@@ -156,6 +156,10 @@
 					transparent:	true
 	
 				});
+				
+				// Assign colours to products
+				var colours = {};
+				for (var topicIndex
 
 				// create the particle variables
 				var particleCount = topics.length,
@@ -188,7 +192,7 @@
 				for( var v = 0; v < particleCount; v++ ) {							
 					values_size[ v ] = 50 + topics[v].size;
 					values_color[ v ] = new THREE.Color();
-					values_color[ v ].setRGB(1, 1, 1);
+					values_color[ v ].setRGB(Math.random() * 32, Math.random() * 32, Math.random() * 32);
 				}
 				
 				// add it to the scene

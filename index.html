@@ -23,6 +23,7 @@
 				
 				var rsfData = "";
 				var extraData = {};
+				extraData.products = [];
 				
 				var productRe = /Product\s*=\s*(.*?)\s*$/;
 				var versionRe = /Version\s*=\s*(.*?)\s*$/;
@@ -49,6 +50,17 @@
 				  			}
 				  			
 				  			var productAndVersion = product + " " + version;
+							
+							var found = false;
+							for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
+								if (extraData.products[productsIndex] == productAndVersion) {
+									found = true;
+									break;
+								}
+							}
+							if (!found) {
+								extraData.products.push(productAndVersion);
+							}
 				  			
 				  			++cspIndex;
 				  			
