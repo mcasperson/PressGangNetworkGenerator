@@ -22,6 +22,10 @@
 				};
 				
 				var rsfData = "";
+				var extraData = {};
+				
+				var productRe = /Product\s*=\s*(.*?)\s*$/;
+				var versionRe = /Version\s*=\s*(.*?)\s*$/;
 				
 				$.ajax({
 				  dataType: "json",
@@ -32,6 +36,20 @@
 				  	getCSPNodesLoop = function () {
 				  		if (cspIndex < cspCount) {
 				  			var csp = cspData.items[cspIndex];
+				  			var cspLines = csp.item.xml.split("\n");
+				  			
+				  			var product = "", version = "";
+				  			
+				  			for (var linesIndex = 0, linesCount = cspLines.length; linesIndex < linesCount; ++linesIndex) {				  			
+					  			var productMatch = cspLines[linesIndex].match(productRe);
+					  			var versionMatch = cspLines[linesIndex].match(versionRe);
+					  			
+					  			if (productMatch != null) product =  productMatch[1];
+					  			if (versionMatch != null) version = versionMatch[1];
+				  			}
+				  			
+				  			var productAndVersion = product + " " + version;
+				  			
 				  			++cspIndex;
 				  			
 				  			$.ajax({
@@ -40,6 +58,22 @@
 							  success: function(topicData) {
 								for (var topicIndex = 0, topicCount = topicData.items.length; topicIndex < topicCount; ++topicIndex) {
 									var topic = topicData.items[topicIndex];
+									
+									if (!extraData[topic.item.id]) {
+										extraData[topic.item.id] = {products: [productAndVersion]};
+									} else {
+										var found = false;
+										for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
+											if (extraData[topic.item.id].products[productsIndex] == productAndVersion) {
+												found = true;
+												break;
+											}
+										}
+										
+										if (!found) {
+											extraData[topic.item.id].products.push(productAndVersion);
+										}
+									}
 									
 									if (rsfData.length != 0) {
 										rsfData += "\n";
@@ -53,6 +87,7 @@
 							});
 				  		} else {
 				  			document.getElementById("output").value = rsfData;
+				  			document.getElementById("extradata").value = "extraData = " + JSON.stringify(extraData);
 				  		}
 				  	}
 				  	
@@ -68,5 +103,6 @@
 	</head>
 	<body>
 		<textarea rows="30" cols="100" id="output"></textarea>
+		<textarea rows="30" cols="100" id="extradata"></textarea>
 	</body>
 </html>
