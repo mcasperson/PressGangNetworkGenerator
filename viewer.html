@@ -125,7 +125,6 @@
 				camera.position.z = 6000;
 
 				scene = new THREE.Scene();
-				//scene.fog = new THREE.Fog( 0x050505, 2000, 7500 );
 				
 				attributes = {
 	
@@ -196,7 +195,7 @@
 
 				renderer = new THREE.WebGLRenderer( { antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.setClearColor( scene.fog.color, 1 );
+				renderer.setClearColor( 0, 1 );
 
 				container.appendChild( renderer.domElement );
 
