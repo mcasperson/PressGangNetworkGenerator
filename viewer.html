@@ -36,6 +36,7 @@
 		<div id="container"></div>
 		<script src="three.min.js"></script>
 		<script src="Detector.js"></script>
+		<script src="extradata.js"></script>
 		
 		<script type="x-shader/x-vertex" id="vertexshader">
 
@@ -184,7 +185,8 @@
 	
 				for( var v = 0; v < particleCount; v++ ) {							
 					values_size[ v ] = topics[v].size;
-					values_color[ v ] = new THREE.Color( 0xffaa00 );
+					values_color[ v ] = new THREE.Color();
+					values_color[ v ].setHSV(Math.random() * 255, 200, 255);
 				}
 				
 				// add it to the scene
