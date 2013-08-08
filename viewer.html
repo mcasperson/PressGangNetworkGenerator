@@ -221,7 +221,7 @@
 					selected.id = "selected";
 					var selectedText = "Topic ID: " + closestCollision.topic.id + " Products: ";
 					if (extraData[closestCollision.topic.id]) {
-						var products = extraData[closestCollision.topic.id].products;
+						var products = extraData[closestCollision.topic.id].productVersionAndTitles;
 						for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
 							if (productsIndex != 0) {
 								selectedText += ", ";
