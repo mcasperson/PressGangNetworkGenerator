@@ -219,7 +219,7 @@
 					selected = document.createElement("div");
 					selected.className = "selected";
 					selected.id = "selected";
-					var selectedText = "Topic ID: " + closestCollision.topic.id + " Products: ";
+					var selectedText = "Topic ID: " + closestCollision.topic.id + "<br/>Products: ";
 					if (extraData[closestCollision.topic.id]) {
 
 						var products = productTopics != null ? 
@@ -237,7 +237,7 @@
 						}										
 					}
 					
-					selected.innerText = selectedText;
+					selected.innerHTML = selectedText;
 					document.body.appendChild(selected);
 				}
 			}
