@@ -45,21 +45,23 @@
 					  			var productMatch = cspLines[linesIndex].match(productRe);
 					  			var versionMatch = cspLines[linesIndex].match(versionRe);
 					  			
-					  			if (productMatch != null) product =  productMatch[1];
+					  			if (productMatch != null) product = productMatch[1];
 					  			if (versionMatch != null) version = versionMatch[1];
 				  			}
 				  			
 				  			var productAndVersion = product + " " + version;
 							
-							var found = false;
-							for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
-								if (extraData.products[productsIndex] == productAndVersion) {
-									found = true;
-									break;
+							if (productAndVersion.trim().length != 0) {
+								var found = false;
+								for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
+									if (extraData.products[productsIndex] == productAndVersion) {
+										found = true;
+										break;
+									}
 								}
-							}
-							if (!found) {
-								extraData.products.push(productAndVersion);
+								if (!found) {
+									extraData.products.push(productAndVersion);
+								}
 							}
 				  			
 				  			++cspIndex;

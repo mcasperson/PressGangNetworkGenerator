@@ -54,6 +54,7 @@
 				right: 8px;
 				bottom: 8px;
 				max-width: 50%;
+				text-align: left;
 			}
 
 		</style>
@@ -304,7 +305,21 @@
 				var table = document.getElementById("table");
 				table.innerHTML = '';
 				
+				// Reset the colliders
 				colliders = [];
+				
+				var displayedProducts = {};
+				// find which products are being displayed
+				for(var p = 0; p < particleCount; p++) {
+					if (extraData[filteredTopics[p].id]) {
+						var products = extraData[filteredTopics[p].id].products;
+						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
+							if (!displayedProducts[products[topicProductIndex]]) {
+								displayedProducts[products[topicProductIndex]] = true;
+							}
+						}
+					}
+				}
 				
 				var productColors = {};
 				var majorColor = 32;
@@ -323,10 +338,13 @@
 						}
 						
 						productColors[extraData.products[productIndex]] = colour;
-						var tableChild = document.createElement("div");
-						tableChild.innerText = extraData.products[productIndex];
-						tableChild.style.color = colour.getStyle();
-						table.appendChild(tableChild);
+						
+						if (displayedProducts[extraData.products[productIndex]]) {
+							var tableChild = document.createElement("div");
+							tableChild.innerText = extraData.products[productIndex];
+							tableChild.style.color = colour.getStyle();
+							table.appendChild(tableChild);
+						}
 				}
 
 				// create the particle variables
