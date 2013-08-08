@@ -98,9 +98,22 @@ getContentSpecs = function() {
 							}
 							
 							if (!found) {
-								extraData[topic.item.id].products.push(productAndVersion);
-								extraData[topic.item.id].productVersionAndTitles.push(productVersionAndTitle);
+								extraData[topic.item.id].products.push(productAndVersion);								
 							}
+							
+							var found = false;
+							for (var productsIndex = 0, productsCount = extraData[topic.item.id].productVersionAndTitle.length; productsIndex < productsCount; ++productsIndex) {
+								if (extraData[topic.item.id].productVersionAndTitle[productsIndex] == productVersionAndTitle) {
+									found = true;
+									break;
+								}
+							}
+							
+							if (!found) {
+								extraData[topic.item.id].productVersionAndTitles.push(productVersionAndTitle);								
+							}
+							
+							
 						}
 						
 						if (rsfData.length != 0) {
@@ -132,7 +145,7 @@ getContentSpecs = function() {
 					
 					fs.writeFile("/tmp/product-" + fixedProduct + ".rsf", 
 					productRsfData[product],
-					function(filename) { 
+					(function(filename) { 
 						return function(err) {
 							if(err) {
 								console.log(err);
@@ -140,7 +153,7 @@ getContentSpecs = function() {
 								console.log("The file /tmp/product-" + filename + ".rsf was saved!");
 							}
 						}
-					}(fixedProduct);
+					})(fixedProduct);
 				}
 		
 				fs.writeFile("/tmp/topics.rsf", rsfData, function(err) {
