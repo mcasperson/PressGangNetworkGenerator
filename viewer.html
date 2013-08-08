@@ -132,6 +132,8 @@
 			
 			var topics = [];
 			
+			var productTopics = [];
+			
 			var filteredTopics;
 			
 			var particleSystem;
@@ -139,6 +141,15 @@
 			var colliders = [];
 			
 			var projector = new THREE.Projector();
+			
+			var filter = document.getElementById("filter");
+			
+			for (var productFileNamesIndex = 0, productFileNamesCount = extraData.productFileNames.length; 
+				productFileNamesIndex < productFileNamesCount; 
+				++productFileNamesIndex) {
+				var productFileName = extraData.productFileNames[productFileNamesIndex];
+				filter.options[filter.options.length] = new Option(productFileName.product, productFileName.fixedProduct);
+			}
 			
 			$.ajax({
 			  dataType: "text",
@@ -217,13 +228,14 @@
 			}
 			
 			function filterTopics() {
-				var filter = document.getElementById("filter");
+				
 				var selectedFilter = filter.options[filter.selectedIndex].value;
 
 				if (selectedFilter == "0") {
 					filteredTopics = topics;
-				} else  {
+				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3" {
 					filteredTopics = [];
+					productTopics = null;
 					
 					for (var topicIndex = 0, topicCount = topics.length; topicIndex < topicCount; ++topicIndex) {
 						var topic = topics[topicIndex];
@@ -240,11 +252,30 @@
 							if (extraData[topic.id] && extraData[topic.id].products.length >= 5) {
 								filteredTopics.push(topic);
 							}
-						}
+						} 
 					}
+					
+					createParticles();
+				} else {	
+					productTopics = [];
+					$.ajax({
+					  dataType: "text",
+					  url: selectedFilter,
+					  success: function(topicData) {
+						var lines = topicData.split("\n");
+						for (var lineIndex = 0, lineCount = lines.length; lineIndex < lineCount; ++lineIndex) {
+							if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
+								var topicDetails = lines[lineIndex].split("\t");
+								if (topicDetails.length == 8) {
+									productTopics.push({id: Number(topicDetails[5]), x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+								}
+							}
+						}
+						
+						createParticles();
+					  }
+					});
 				}
-				
-				createParticles();
 			}
 			
 			function init() {
@@ -302,7 +333,9 @@
 			}
 			
 			function createParticles() {
-				var particleCount = filteredTopics.length;
+				var displayedTopics = productTopics == null ? filteredTopics : productTopics;
+				
+				var particleCount = displayedTopics.length;
 				
 				// Assign colours to products
 				var table = document.getElementById("table");
@@ -314,8 +347,8 @@
 				var displayedProducts = {};
 				// find which products are being displayed
 				for(var p = 0; p < particleCount; p++) {
-					if (extraData[filteredTopics[p].id]) {
-						var products = extraData[filteredTopics[p].id].products;
+					if (extraData[displayedTopics[p].id]) {
+						var products = extraData[displayedTopics[p].id].products;
 						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
 							if (!displayedProducts[products[topicProductIndex]]) {
 								displayedProducts[products[topicProductIndex]] = true;
@@ -358,22 +391,22 @@
 				// now create the individual particles
 				for(var p = 0; p < particleCount; p++) {
 
-					var pX = filteredTopics[p].x,
-						pY = filteredTopics[p].y,
-						pZ = filteredTopics[p].z,
+					var pX = displayedTopics[p].x,
+						pY = displayedTopics[p].y,
+						pZ = displayedTopics[p].z,
 						particle = new THREE.Vector3(pX, pY, pZ);
 					  
-					values_size[ p ] = 50 + (10 * filteredTopics[p].size);
+					values_size[ p ] = 50 + (10 * displayedTopics[p].size);
 					
 					var sphereCollider = new THREE.Sphere(particle, 25);
 					sphereCollider.particle = particle;
-					sphereCollider.topic = filteredTopics[p];
+					sphereCollider.topic = displayedTopics[p];
 					colliders.push(sphereCollider);
 					
 					var r = 0, g = 0, b = 0;
 
-					if (extraData[filteredTopics[p].id]) {
-						var products = extraData[filteredTopics[p].id].products;
+					if (extraData[displayedTopics[p].id]) {
+						var products = extraData[displayedTopics[p].id].products;
 						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
 							r += productColors[products[topicProductIndex]].r;
 							g += productColors[products[topicProductIndex]].g;

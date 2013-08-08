@@ -127,7 +127,7 @@ getContentSpecs = function() {
 				for (var product in productRsfData) {
 					var fixedProduct = product.replace(/[^A-Za-z0-9]/g, "");
 					
-					extraData.productFileNames.push({product: fixedProduct + ".rsf.lay"});
+					extraData.productFileNames.push({product: product, filename: fixedProduct + ".rsf.lay"});
 					
 					fs.writeFile("/tmp/product-" + fixedProduct + ".rsf", 
 					productRsfData[product],
