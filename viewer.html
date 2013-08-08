@@ -62,10 +62,12 @@
 	<body>
 		<button type="button" class="reset" onclick="controls.reset()">Reset Camera</button>
 		<select class="filter" id="filter" onchange="filterTopics()">
-			<option value="0">None</option>
-			<option value="1">More than 2 Products</option>
-			<option value="2">More than 3 Products</option>
-			<option value="3">More than 5 Products</option>
+			<optgroup label="Global Filters">
+				<option value="0">None</option>
+				<option value="1">More than 2 Products</option>
+				<option value="2">More than 3 Products</option>
+				<option value="3">More than 5 Products</option>
+			</optgroup>
 		</select>
 		<div id="table" class="productTable"></div>
 		<div id="container"></div>
@@ -132,7 +134,7 @@
 			
 			var topics = [];
 			
-			var productTopics = [];
+			var productTopics = null;
 			
 			var filteredTopics;
 			
@@ -142,13 +144,20 @@
 			
 			var projector = new THREE.Projector();
 			
-			var filter = document.getElementById("filter");
-			
+			var filter = document.getElementById("filter");			
+			var optGroup = document.createElement('optgroup')
+			optGroup.label = "Products"
+			filter.appendChild(optGroup)
+
 			for (var productFileNamesIndex = 0, productFileNamesCount = extraData.productFileNames.length; 
 				productFileNamesIndex < productFileNamesCount; 
 				++productFileNamesIndex) {
 				var productFileName = extraData.productFileNames[productFileNamesIndex];
-				filter.options[filter.options.length] = new Option(productFileName.product, productFileName.fixedProduct);
+				
+				var objOption = document.createElement("option")
+				objOption.innerHTML = productFileName.product;
+				objOption.value = "product-" + productFileName.filename;
+				optGroup.appendChild(objOption);
 			}
 			
 			$.ajax({
@@ -233,7 +242,7 @@
 
 				if (selectedFilter == "0") {
 					filteredTopics = topics;
-				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3" {
+				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3") {
 					filteredTopics = [];
 					productTopics = null;
 					
@@ -396,7 +405,7 @@
 						pZ = displayedTopics[p].z,
 						particle = new THREE.Vector3(pX, pY, pZ);
 					  
-					values_size[ p ] = 50 + (10 * displayedTopics[p].size);
+					values_size[ p ] = 50;// + (10 * displayedTopics[p].size);
 					
 					var sphereCollider = new THREE.Sphere(particle, 25);
 					sphereCollider.particle = particle;
