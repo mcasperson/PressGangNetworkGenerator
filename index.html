@@ -50,18 +50,19 @@
 				  			}
 				  			
 				  			var productAndVersion = product + " " + version;
+							if (productAndVersion.trim().length == 0) {
+								productAndVersion = "[UNDEFINED]";
+							}
 							
-							if (productAndVersion.trim().length != 0) {
-								var found = false;
-								for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
-									if (extraData.products[productsIndex] == productAndVersion) {
-										found = true;
-										break;
-									}
+							var found = false;
+							for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
+								if (extraData.products[productsIndex] == productAndVersion) {
+									found = true;
+									break;
 								}
-								if (!found) {
-									extraData.products.push(productAndVersion);
-								}
+							}
+							if (!found) {
+								extraData.products.push(productAndVersion);
 							}
 				  			
 				  			++cspIndex;
@@ -93,7 +94,7 @@
 										rsfData += "\n";
 									}
 									
-									rsfData += "PRESSGANG " + csp.item.id + " " + topic.item.id;
+									rsfData += "PRESSGANG \"" + productAndVersion + "\" " + topic.item.id;
 								}
 								
 								getCSPNodesLoop();	

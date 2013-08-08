@@ -289,6 +289,9 @@
 				createParticles();
 
 				renderer = new THREE.WebGLRenderer( { antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false } );
+				/*renderer = Detector.webgl ? 
+					new THREE.WebGLRenderer({ antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false }): 
+					new THREE.CanvasRenderer({ antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false });*/
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setClearColor( 0, 1 );
 
