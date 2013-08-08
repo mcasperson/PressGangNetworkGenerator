@@ -20,11 +20,13 @@ getContentSpecs = function() {
 	};
 	
 	var rsfData = "";
+	var productRsfData = {};
 	var extraData = {};
 	extraData.products = [];
 	
 	var productRe = /Product\s*=\s*(.*?)\s*$/;
 	var versionRe = /Version\s*=\s*(.*?)\s*$/;
+	var titleRe = /Title\s*=\s*(.*?)\s*$/;
 	
 	console.log("Getting content spec IDs");
 	
@@ -42,19 +44,26 @@ getContentSpecs = function() {
 				
 				var cspLines = csp.item.xml.split("\n");
 				
-				var product = "", version = "";
+				var product = "", version = "", title = "";
 				
 				for (var linesIndex = 0, linesCount = cspLines.length; linesIndex < linesCount; ++linesIndex) {				  			
 					var productMatch = cspLines[linesIndex].match(productRe);
 					var versionMatch = cspLines[linesIndex].match(versionRe);
+					var titleMatch = cspLines[linesIndex].match(titleRe);
 					
-					if (productMatch != null) product = productMatch[1];
-					if (versionMatch != null) version = versionMatch[1];
-				}
+					if (productMatch != null) product = productMatch[1].trim();
+					if (versionMatch != null) version = versionMatch[1].trim();
+					if (titleMatch != null) title = titleMatch[1].trim();
+				}							
 				
 				var productAndVersion = (product + " " + version).trim();
 				if (productAndVersion.length == 0) {
 					productAndVersion = "[UNDEFINED]";
+				}
+				
+				var productVersionAndTitle = (product + " " + version + " " + title).trim();
+				if (productVersionAndTitle.length == 0) {
+					productVersionAndTitle = "[UNDEFINED]";
 				}
 				
 				var found = false;
@@ -98,13 +107,32 @@ getContentSpecs = function() {
 						}
 						
 						rsfData += "PRODVER \"" + productAndVersion + "\" " + topic.item.id;
-						rsfData += "SPEC \"" + csp.item.id + "\" " + topic.item.id;
+						
+						if (!productRsfData[product]) {
+							productRsfData[product] = "";
+						} else {
+							productRsfData[product] += "\n";
+						}						
+						
+						productRsfData[product] += "PRODVERTITLE \"" + productVersionAndTitle + "\" " + topic.item.id;
 					}
 					
 					getCSPNodesLoop();	
 				  }
 				});
 			} else {
+			
+				for (var product in productRsfData) {
+					fs.writeFile("/tmp/product-" + product.replace(/[^A-Za-z0-9]/g, "") + ".rsf", 
+					productRsfData[product],
+					function(err) {
+						if(err) {
+							console.log(err);
+						} else {
+							console.log("The file "/tmp/product-" + product.replace(/[^A-Za-z0-9]/g, "") + ".rsf was saved!");
+						}
+					});
+				}
 		
 				fs.writeFile("/tmp/topics.rsf", rsfData, function(err) {
 					if(err) {
