@@ -52,8 +52,8 @@ getContentSpecs = function() {
 					if (versionMatch != null) version = versionMatch[1];
 				}
 				
-				var productAndVersion = product + " " + version;
-				if (productAndVersion.trim().length == 0) {
+				var productAndVersion = (product + " " + version).trim();
+				if (productAndVersion.length == 0) {
 					productAndVersion = "[UNDEFINED]";
 				}
 				
