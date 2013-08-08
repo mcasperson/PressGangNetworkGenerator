@@ -105,11 +105,11 @@ getContentSpecs = function() {
 				});
 			} else {
 		
-				fs.writeFile("/tmp/topic.rsf", rsfData, function(err) {
+				fs.writeFile("/tmp/topics.rsf", rsfData, function(err) {
 					if(err) {
 						console.log(err);
 					} else {
-						console.log("The file /tmp/topic.rsf was saved!");
+						console.log("The file /tmp/topics.rsf was saved!");
 					}
 				}); 
 				
