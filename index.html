@@ -26,6 +26,8 @@ getContentSpecs = function() {
 	var productRe = /Product\s*=\s*(.*?)\s*$/;
 	var versionRe = /Version\s*=\s*(.*?)\s*$/;
 	
+	console.log("Getting content spec IDs");
+	
 	$.ajax({
 	  dataType: "json",
 	  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
@@ -33,8 +35,11 @@ getContentSpecs = function() {
 		var cspIndex = 0;
 		var cspCount = cspData.items.length;
 		getCSPNodesLoop = function () {
-			if (cspIndex < cspCount) {
+			if (cspIndex < cspCount) {							
 				var csp = cspData.items[cspIndex];
+				
+				console.log("Processing content spec ID " + csp.item.id + ". " + (cspIndex/cspCount*100) + "%");
+				
 				var cspLines = csp.item.xml.split("\n");
 				
 				var product = "", version = "";
