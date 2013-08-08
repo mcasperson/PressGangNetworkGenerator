@@ -300,9 +300,7 @@
 				container = document.getElementById( 'container' );
 
 				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 100000 );
-				camera.position.z = 7500;
-				
-				setupControls();
+				camera.position.z = 7500;								
 
 				scene = new THREE.Scene();
 				
@@ -333,8 +331,6 @@
 					transparent:	true
 	
 				});
-				
-				createParticles();
 
 				renderer = new THREE.WebGLRenderer( { antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false } );
 				/*renderer = Detector.webgl ? 
@@ -347,6 +343,9 @@
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				window.addEventListener( 'mousemove', mouseMove, false );
+				
+				setupControls();
+				createParticles();
 			}
 			
 			function createParticles() {
@@ -438,6 +437,11 @@
 					particles.vertices.push(particle);
 				}
 				
+				particles.computeBoundingSphere();
+				controls.position0.x = controls.position0.y = 0;
+				controls.position0.z = particles.boundingSphere.radius * 5;
+				controls.reset();
+				
 				if (particleSystem != null) {
 					scene.remove(particleSystem);
 					particleSystem = null;
@@ -494,10 +498,9 @@
 			function render() {
 
 				/*var time = Date.now() * 0.001;
-
 				particleSystem.rotation.x = time * 0.25;
 				particleSystem.rotation.y = time * 0.5;*/
-
+				
 				renderer.render( scene, camera );
 			}
 
