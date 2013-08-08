@@ -239,12 +239,14 @@
 			function filterTopics() {
 				
 				var selectedFilter = filter.options[filter.selectedIndex].value;
+				productTopics = null;
 
 				if (selectedFilter == "0") {
 					filteredTopics = topics;
+					
+					createParticles();
 				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3") {
-					filteredTopics = [];
-					productTopics = null;
+					filteredTopics = [];					
 					
 					for (var topicIndex = 0, topicCount = topics.length; topicIndex < topicCount; ++topicIndex) {
 						var topic = topics[topicIndex];
@@ -407,7 +409,7 @@
 					  
 					values_size[ p ] = 50;// + (10 * displayedTopics[p].size);
 					
-					var sphereCollider = new THREE.Sphere(particle, 25);
+					var sphereCollider = new THREE.Sphere(particle, 50);
 					sphereCollider.particle = particle;
 					sphereCollider.topic = displayedTopics[p];
 					colliders.push(sphereCollider);
