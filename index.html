@@ -131,13 +131,15 @@ getContentSpecs = function() {
 					
 					fs.writeFile("/tmp/product-" + fixedProduct + ".rsf", 
 					productRsfData[product],
-					function(err) {
-						if(err) {
-							console.log(err);
-						} else {
-							console.log("The file /tmp/product-" + fixedProduct + ".rsf was saved!");
+					function(filename) { 
+						return function(err) {
+							if(err) {
+								console.log(err);
+							} else {
+								console.log("The file /tmp/product-" + filename + ".rsf was saved!");
+							}
 						}
-					});
+					}(fixedProduct);
 				}
 		
 				fs.writeFile("/tmp/topics.rsf", rsfData, function(err) {
