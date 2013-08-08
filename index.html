@@ -147,7 +147,17 @@
 			var filter = document.getElementById("filter");			
 			var optGroup = document.createElement('optgroup')
 			optGroup.label = "Products"
-			filter.appendChild(optGroup)
+			filter.appendChild(optGroup);
+			
+			function compare(a,b) {
+			  if (a.product < b.product)
+				 return -1;
+			  if (a.product > b.product)
+				return 1;
+			  return 0;
+			}
+			
+			extraData.productFileNames.sort(compare);
 
 			for (var productFileNamesIndex = 0, productFileNamesCount = extraData.productFileNames.length; 
 				productFileNamesIndex < productFileNamesCount; 
