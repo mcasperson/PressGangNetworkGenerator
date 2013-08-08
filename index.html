@@ -386,6 +386,7 @@
 				var productColors = {};
 				var majorColor = 32;
 				var minorColor = 1;
+				var productsList = [];
 				for (var productIndex = 0, productCount = extraData.products.length; productIndex < productCount; ++productIndex) {
 						
 						var colour = new THREE.Color();
@@ -405,8 +406,17 @@
 							var tableChild = document.createElement("div");
 							tableChild.innerText = extraData.products[productIndex];
 							tableChild.style.color = colour.getStyle();
-							table.appendChild(tableChild);
+							productsList.push(tableChild);
 						}
+				}
+				productsList.sort(function(a,b) {
+					if (a.innerText < b.innerText) return -1;
+					if (a.innerText > b.innerText) return 1;
+					return 0;
+				});
+				
+				for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+					table.appendChild(productsList[productsListIndex]);
 				}
 
 				// create the particle variables
