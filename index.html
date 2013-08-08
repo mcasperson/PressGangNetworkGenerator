@@ -97,7 +97,8 @@ getContentSpecs = function() {
 							rsfData += "\n";
 						}
 						
-						rsfData += "PRESSGANG \"" + productAndVersion + "\" " + topic.item.id;
+						rsfData += "PRODVER \"" + productAndVersion + "\" " + topic.item.id;
+						rsfData += "SPEC \"" + csp.item.id + "\" " + topic.item.id;
 					}
 					
 					getCSPNodesLoop();	
