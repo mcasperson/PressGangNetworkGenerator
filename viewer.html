@@ -48,15 +48,23 @@
 				right: 8px;
 				top: 8px;
 			}
+			
+			.selected {
+				position: absolute;
+				right: 8px;
+				bottom: 8px;
+				max-width: 50%;
+			}
 
 		</style>
 	</head>
 	<body>
-		<button type="button" class="reset" onclick="controls.reset()">Reset</button>
-		<select class="filter">
-			<option>More than 2 Products</option>
-			<option>More than 3 Products</option>
-			<option>More than 5 Products</option>
+		<button type="button" class="reset" onclick="controls.reset()">Reset Camera</button>
+		<select class="filter" id="filter" onchange="filterTopics()">
+			<option value="0">None</option>
+			<option value="1">More than 2 Products</option>
+			<option value="2">More than 3 Products</option>
+			<option value="3">More than 5 Products</option>
 		</select>
 		<div id="table" class="productTable"></div>
 		<div id="container"></div>
@@ -127,6 +135,10 @@
 			
 			var particleSystem;
 			
+			var colliders = [];
+			
+			var projector = new THREE.Projector();
+			
 			$.ajax({
 			  dataType: "text",
 			  url: "topics.lay",
@@ -147,6 +159,92 @@
 				animate();
 			  }
 			});
+			
+			function mouseMove(event) {
+				var mouse2D = new THREE.Vector2(0, 0);
+				var mouse3D = new THREE.Vector3(0, 0, 0);
+				
+				mouse3D.x = mouse2D.x = (event.clientX / window.innerWidth) * 2 - 1;
+				mouse3D.y = mouse2D.y = -(event.clientY / window.innerHeight) * 2 + 1;
+				mouse3D.z = 0.5;
+
+				projector.unprojectVector( mouse3D, camera );
+				var ray = new THREE.Ray( camera.position, mouse3D.sub( camera.position ).normalize() );
+				
+				var collisions = [];
+				for (var collidersIndex = 0, collidersCount = colliders.length; collidersIndex < collidersCount; ++collidersIndex) {
+					var collisionSphere = colliders[collidersIndex];
+					if (ray.isIntersectionSphere(collisionSphere)) {
+						collisions.push(collisionSphere);
+					}
+				}
+				
+				var closestCollision;
+				var closestCollisionDist;
+				for (var collisionsIndex = 0, collisionsCount = collisions.length; collisionsIndex < collisionsCount; ++collisionsIndex) {
+					var distToCamera = collisions[collisionsIndex].distanceToPoint(camera.position);
+					if (!closestCollision || closestCollisionDist > distToCamera) {
+						closestCollisionDist = distToCamera;
+						closestCollision = collisions[collisionsIndex];
+					}
+				}
+				
+				if (closestCollision) {
+					var selected = document.getElementById("selected");
+					if (selected) {
+						selected.parentNode.removeChild(selected);
+					}
+					
+					selected = document.createElement("div");
+					selected.className = "selected";
+					selected.id = "selected";
+					var selectedText = "Topic ID: " + closestCollision.topic.id + " Products: ";
+					if (extraData[closestCollision.topic.id]) {
+						var products = extraData[closestCollision.topic.id].products;
+						for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
+							if (productsIndex != 0) {
+								selectedText += ", ";
+							}
+							
+							selectedText += products[productsIndex];
+						}						
+					}
+					
+					selected.innerText = selectedText;
+					document.body.appendChild(selected);
+				}
+			}
+			
+			function filterTopics() {
+				var filter = document.getElementById("filter");
+				var selectedFilter = filter.options[filter.selectedIndex].value;
+
+				if (selectedFilter == "0") {
+					filteredTopics = topics;
+				} else  {
+					filteredTopics = [];
+					
+					for (var topicIndex = 0, topicCount = topics.length; topicIndex < topicCount; ++topicIndex) {
+						var topic = topics[topicIndex];
+						
+						if (selectedFilter == "1") {
+							if (extraData[topic.id] && extraData[topic.id].products.length >= 2) {
+								filteredTopics.push(topic);
+							}
+						} else if (selectedFilter == "2") {
+							if (extraData[topic.id] && extraData[topic.id].products.length >= 3) {
+								filteredTopics.push(topic);
+							}
+						} else if (selectedFilter == "3") {
+							if (extraData[topic.id] && extraData[topic.id].products.length >= 5) {
+								filteredTopics.push(topic);
+							}
+						}
+					}
+				}
+				
+				createParticles();
+			}
 			
 			function init() {
 
@@ -196,6 +294,7 @@
 				container.appendChild( renderer.domElement );
 
 				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener( 'mousemove', mouseMove, false );
 			}
 			
 			function createParticles() {
@@ -204,6 +303,8 @@
 				// Assign colours to products
 				var table = document.getElementById("table");
 				table.innerHTML = '';
+				
+				colliders = [];
 				
 				var productColors = {};
 				var majorColor = 32;
@@ -242,7 +343,11 @@
 						particle = new THREE.Vector3(pX, pY, pZ);
 					  
 					values_size[ p ] = 50 + (10 * filteredTopics[p].size);
-					//values_size[ p ] = 50 * (extraData[filteredTopics[p].id] ? extraData[filteredTopics[p].id].products.length - 1 : 0);
+					
+					var sphereCollider = new THREE.Sphere(particle, 25);
+					sphereCollider.particle = particle;
+					sphereCollider.topic = filteredTopics[p];
+					colliders.push(sphereCollider);
 					
 					var r = 0, g = 0, b = 0;
 
@@ -323,7 +428,6 @@
 				particleSystem.rotation.y = time * 0.5;*/
 
 				renderer.render( scene, camera );
-
 			}
 
 		</script>
