@@ -1,123 +1,126 @@
-<html>
-	<head>
-		<script type="application/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-		<script type="application/javascript">
+var $ = require('jquery');
+var fs = require('fs');
 						
-			finished = function(data) {
-				console.log(JSON.stringify(data));
-			}		
-			
-			getContentSpecs = function() {
-				var contentSpecQueryURL = "http://skynet.usersys.redhat.com:8080/pressgang-ccms/rest/1/topics/get/json/query;tag268=1;logic=And?expand=";
-				var topicsInContentSpec = "http://skynet.usersys.redhat.com:8080/pressgang-ccms/rest/1/topics/get/json/query;topicIncludedInSpec=#CSPID#;logic=And?expand="
+finished = function(data) {
+	console.log(JSON.stringify(data));
+}		
+
+getContentSpecs = function() {
+	var contentSpecQueryURL = "http://skynet.usersys.redhat.com:8080/pressgang-ccms/rest/1/topics/get/json/query;tag268=1;logic=And?expand=";
+	var topicsInContentSpec = "http://skynet.usersys.redhat.com:8080/pressgang-ccms/rest/1/topics/get/json/query;topicIncludedInSpec=#CSPID#;logic=And?expand="
+	
+	var queryExpand = {
+		"branches":[
+			{
+				"trunk":{
+					"name": "topics"
+				}
+			}
+		]
+	};
+	
+	var rsfData = "";
+	var extraData = {};
+	extraData.products = [];
+	
+	var productRe = /Product\s*=\s*(.*?)\s*$/;
+	var versionRe = /Version\s*=\s*(.*?)\s*$/;
+	
+	$.ajax({
+	  dataType: "json",
+	  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
+	  success: function(cspData) {
+		var cspIndex = 0;
+		var cspCount = cspData.items.length;
+		getCSPNodesLoop = function () {
+			if (cspIndex < cspCount) {
+				var csp = cspData.items[cspIndex];
+				var cspLines = csp.item.xml.split("\n");
 				
-				var queryExpand = {
-					"branches":[
-						{
-							"trunk":{
-								"name": "topics"
-							}
-						}
-					]
-				};
+				var product = "", version = "";
 				
-				var rsfData = "";
-				var extraData = {};
-				extraData.products = [];
+				for (var linesIndex = 0, linesCount = cspLines.length; linesIndex < linesCount; ++linesIndex) {				  			
+					var productMatch = cspLines[linesIndex].match(productRe);
+					var versionMatch = cspLines[linesIndex].match(versionRe);
+					
+					if (productMatch != null) product = productMatch[1];
+					if (versionMatch != null) version = versionMatch[1];
+				}
 				
-				var productRe = /Product\s*=\s*(.*?)\s*$/;
-				var versionRe = /Version\s*=\s*(.*?)\s*$/;
+				var productAndVersion = product + " " + version;
+				if (productAndVersion.trim().length == 0) {
+					productAndVersion = "[UNDEFINED]";
+				}
+				
+				var found = false;
+				for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
+					if (extraData.products[productsIndex] == productAndVersion) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					extraData.products.push(productAndVersion);
+				}
+				
+				++cspIndex;
 				
 				$.ajax({
 				  dataType: "json",
-				  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
-				  success: function(cspData) {
-				  	var cspIndex = 0;
-				  	var cspCount = cspData.items.length;
-				  	getCSPNodesLoop = function () {
-				  		if (cspIndex < cspCount) {
-				  			var csp = cspData.items[cspIndex];
-				  			var cspLines = csp.item.xml.split("\n");
-				  			
-				  			var product = "", version = "";
-				  			
-				  			for (var linesIndex = 0, linesCount = cspLines.length; linesIndex < linesCount; ++linesIndex) {				  			
-					  			var productMatch = cspLines[linesIndex].match(productRe);
-					  			var versionMatch = cspLines[linesIndex].match(versionRe);
-					  			
-					  			if (productMatch != null) product = productMatch[1];
-					  			if (versionMatch != null) version = versionMatch[1];
-				  			}
-				  			
-				  			var productAndVersion = product + " " + version;
-							if (productAndVersion.trim().length == 0) {
-								productAndVersion = "[UNDEFINED]";
-							}
-							
+				  url: topicsInContentSpec.replace("#CSPID#", csp.item.id) + encodeURIComponent(JSON.stringify(queryExpand)),
+				  success: function(topicData) {
+					for (var topicIndex = 0, topicCount = topicData.items.length; topicIndex < topicCount; ++topicIndex) {
+						var topic = topicData.items[topicIndex];
+						
+						if (!extraData[topic.item.id]) {
+							extraData[topic.item.id] = {products: [productAndVersion]};
+						} else {
 							var found = false;
-							for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
-								if (extraData.products[productsIndex] == productAndVersion) {
+							for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
+								if (extraData[topic.item.id].products[productsIndex] == productAndVersion) {
 									found = true;
 									break;
 								}
 							}
+							
 							if (!found) {
-								extraData.products.push(productAndVersion);
+								extraData[topic.item.id].products.push(productAndVersion);
 							}
-				  			
-				  			++cspIndex;
-				  			
-				  			$.ajax({
-							  dataType: "json",
-							  url: topicsInContentSpec.replace("#CSPID#", csp.item.id) + encodeURIComponent(JSON.stringify(queryExpand)),
-							  success: function(topicData) {
-								for (var topicIndex = 0, topicCount = topicData.items.length; topicIndex < topicCount; ++topicIndex) {
-									var topic = topicData.items[topicIndex];
-									
-									if (!extraData[topic.item.id]) {
-										extraData[topic.item.id] = {products: [productAndVersion]};
-									} else {
-										var found = false;
-										for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
-											if (extraData[topic.item.id].products[productsIndex] == productAndVersion) {
-												found = true;
-												break;
-											}
-										}
-										
-										if (!found) {
-											extraData[topic.item.id].products.push(productAndVersion);
-										}
-									}
-									
-									if (rsfData.length != 0) {
-										rsfData += "\n";
-									}
-									
-									rsfData += "PRESSGANG \"" + productAndVersion + "\" " + topic.item.id;
-								}
-								
-								getCSPNodesLoop();	
-							  }
-							});
-				  		} else {
-				  			document.getElementById("output").value = rsfData;
-				  			document.getElementById("extradata").value = "extraData = " + JSON.stringify(extraData);
-				  		}
-				  	}
-				  	
-				  	getCSPNodesLoop();
+						}
+						
+						if (rsfData.length != 0) {
+							rsfData += "\n";
+						}
+						
+						rsfData += "PRESSGANG \"" + productAndVersion + "\" " + topic.item.id;
+					}
+					
+					getCSPNodesLoop();	
 				  }
 				});
+			} else {
+		
+				fs.writeFile("/tmp/topic.rsf", rsfData, function(err) {
+					if(err) {
+						console.log(err);
+					} else {
+						console.log("The file /tmp/topic.rsf was saved!");
+					}
+				}); 
+				
+				fs.writeFile("/tmp/extradata.js", "extraData = " + JSON.stringify(extraData), function(err) {
+					if(err) {
+						console.log(err);
+					} else {
+						console.log("The file /tmp/extradata.js was saved!");
+					}
+				});
 			}
+		}
+		
+		getCSPNodesLoop();
+	  }
+	});
+}
 
-			getContentSpecs();
-			
-			
-		</script>
-	</head>
-	<body>
-		<textarea rows="30" cols="100" id="output"></textarea>
-		<textarea rows="30" cols="100" id="extradata"></textarea>
-	</body>
-</html>
+getContentSpecs();
