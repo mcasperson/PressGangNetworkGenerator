@@ -38,7 +38,7 @@ getContentSpecs = function() {
 			if (cspIndex < cspCount) {							
 				var csp = cspData.items[cspIndex];
 				
-				console.log("Processing content spec ID " + csp.item.id + ". " + (cspIndex/cspCount*100) + "%");
+				console.log("Processing content spec ID " + csp.item.id + ". " + (cspIndex/cspCount*100).toFixed(2) + "%");
 				
 				var cspLines = csp.item.xml.split("\n");
 				
