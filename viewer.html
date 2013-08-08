@@ -221,14 +221,20 @@
 					selected.id = "selected";
 					var selectedText = "Topic ID: " + closestCollision.topic.id + " Products: ";
 					if (extraData[closestCollision.topic.id]) {
-						var products = extraData[closestCollision.topic.id].productVersionAndTitles;
-						for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
-							if (productsIndex != 0) {
-								selectedText += ", ";
-							}
+
+						var products = productTopics != null ? 
+							extraData[closestCollision.topic.id].productVersionAndTitles : 
+							extraData[closestCollision.topic.id].products;
 							
-							selectedText += products[productsIndex];
-						}						
+						if (products) {
+							for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
+								if (productsIndex != 0) {
+									selectedText += ", ";
+								}
+								
+								selectedText += products[productsIndex];
+							}	
+						}										
 					}
 					
 					selected.innerText = selectedText;
@@ -409,7 +415,7 @@
 					  
 					values_size[ p ] = 50;// + (10 * displayedTopics[p].size);
 					
-					var sphereCollider = new THREE.Sphere(particle, 50);
+					var sphereCollider = new THREE.Sphere(particle, 10);
 					sphereCollider.particle = particle;
 					sphereCollider.topic = displayedTopics[p];
 					colliders.push(sphereCollider);
