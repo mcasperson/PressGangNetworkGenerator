@@ -102,8 +102,8 @@ getContentSpecs = function() {
 							}
 							
 							var found = false;
-							for (var productsIndex = 0, productsCount = extraData[topic.item.id].productVersionAndTitle.length; productsIndex < productsCount; ++productsIndex) {
-								if (extraData[topic.item.id].productVersionAndTitle[productsIndex] == productVersionAndTitle) {
+							for (var productsIndex = 0, productsCount = extraData[topic.item.id].productVersionAndTitles.length; productsIndex < productsCount; ++productsIndex) {
+								if (extraData[topic.item.id].productVersionAndTitles[productsIndex] == productVersionAndTitle) {
 									found = true;
 									break;
 								}
