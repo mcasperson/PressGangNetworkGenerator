@@ -123,13 +123,15 @@ getContentSpecs = function() {
 			} else {
 			
 				for (var product in productRsfData) {
-					fs.writeFile("/tmp/product-" + product.replace(/[^A-Za-z0-9]/g, "") + ".rsf", 
+					var fixedProduct = product.replace(/[^A-Za-z0-9]/g, "");
+					
+					fs.writeFile("/tmp/product-" + fixedProduct + ".rsf", 
 					productRsfData[product],
 					function(err) {
 						if(err) {
 							console.log(err);
 						} else {
-							console.log("The file /tmp/product-" + product.replace(/[^A-Za-z0-9]/g, "") + ".rsf was saved!");
+							console.log("The file /tmp/product-" + fixedProduct + ".rsf was saved!");
 						}
 					});
 				}
