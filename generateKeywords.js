@@ -63,7 +63,7 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 					/*
 						Link the product to the keyword
 					*/
-					keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
+					keywordsRsf += "KEYWORD \"" + product + "\" \"" + keyword + "\""; 
 				}
 			}							
 		}
