@@ -99,7 +99,6 @@ getContentSpecs = function() {
 								/*
 									Write out the topic's XML as text
 								*/	
-								++keywordSaveRequest;
 								fs.writeFile(
 										"/tmp/vis/" + topic.item.id + ".xml.txt", 
 										topic.item.xml == null ? 
