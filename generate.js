@@ -89,13 +89,18 @@ getContentSpecs = function() {
 								/*
 									Write out the topic's XML as text
 								*/								
-								fs.writeFile("/tmp/vis/" + topic.id + ".xml.txt", topic.item.xml.replace(/<.*?>/g, " "), function(err) {
-									if(err) {
-										console.log(err);
-									} else {
-										console.log("/tmp/vis/" + topic.id + ".xml.txt");
-									}
-								}); 
+								fs.writeFile(
+										"/tmp/vis/" + topic.item.id + ".xml.txt", 
+										topic.item.xml.replace(/<.*?>/g, " "), 
+										(function(saveTopic) {
+											return function(err) {
+												if(err) {
+													console.log(err);
+												} else {
+													console.log("/tmp/vis/" + saveTopic.item.id + ".xml.txt");
+												}
+											}
+									})(topic)); 
 								
 								if (!extraData[topic.item.id]) {
 									extraData[topic.item.id] = {products: [productAndVersion], productVersionAndTitles: [productVersionAndTitle]};
