@@ -191,20 +191,39 @@ getContentSpecs = function() {
 						Extract the key words
 					*/	
 					console.log("Extracting keywords");
+					
+					var keywordsRsf = "";
+					saveKeywords = function() {
+						fs.writeFile(
+								"/tmp/vis/keywords.rsf", 
+								keywordsRsf, 
+								function(err) {
+									if(err) {
+										console.log(err);
+									} else {
+										console.log("The file /tmp/vis/keywords.rsf was saved!");
+									}
+								}
+							);	
+					};
+					
 					exec(
 						"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
 						function (error, stdout, stderr) 
 						{ 
 							console.log(stdout);
-							var keywordsRsf = "";
+							
 							var filesProcessed = 0;
 							var filenames = fs.readdirSync("/tmp/vis/");
+							console.log("Found " + filenames.length + " files");
 							for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
-									var filename = filenames[filenamesIndex];
+								
+									var filename = filenames[filenamesIndex];									
 									if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
+										console.log("Processing " + filename);
+										
 										var topicId = filename.substr(0, filename.length - 8);
-										if (extraData[topicId]) {
-																				
+										if (extraData[topicId]) {																				
 											fs.readFile(
 												filename, 
 												'utf8', 
@@ -234,22 +253,17 @@ getContentSpecs = function() {
 														*/
 														++filesProcessed;
 														if (filesProcessed == myFilenamesCount - 1) {
-																fs.writeFile(
-																	"/tmp/vis/keywords.rsf", 
-																	keywordsRsf, 
-																	function(err) {
-																		if(err) {
-																			console.log(err);
-																		} else {
-																			console.log("The file /tmp/vis/keywords.rsf was saved!");
-																		}
-																	}
-																);	
+															saveKeywords();			
 														}
 													}
 												})(filenamesIndex, filenamesCount)
 											);
 											
+										} else {
+											++filesProcessed;
+											if (filesProcessed == filenamesCount - 1) {
+												saveKeywords();			
+											}	
 										}
 									}
 							}
