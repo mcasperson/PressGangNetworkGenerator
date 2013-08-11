@@ -189,7 +189,8 @@ getContentSpecs = function() {
 					
 					/*
 						Extract the key words
-					*/										
+					*/	
+					console.log("Extracting keywords");
 					exec(
 						"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
 						function (error, stdout, stderr) 
@@ -197,7 +198,7 @@ getContentSpecs = function() {
 							console.log(stdout);
 							var keywordsRsf = "";
 							var filesProcessed = 0;
-							var filenames = fs.readdirSync("/tmp/vis");
+							var filenames = fs.readdirSync("/tmp/vis/");
 							for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
 									var filename = filenames[filenamesIndex];
 									if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
