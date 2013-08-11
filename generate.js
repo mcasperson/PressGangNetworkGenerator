@@ -31,11 +31,111 @@ getContentSpecs = function() {
 	
 	console.log("Getting content spec IDs");
 	
+	saveKeywords = function() {
+		/*
+			Extract the key words
+		*/	
+		console.log("Extracting keywords");
+		
+		var keywordsRsf = "";
+		writeToFile = function() {
+			fs.writeFile(
+					"/tmp/vis/keywords.rsf", 
+					keywordsRsf, 
+					function(err) {
+						if(err) {
+							console.log(err);
+						} else {
+							console.log("The file /tmp/vis/keywords.rsf was saved!");
+						}
+					}
+				);	
+		};
+		
+		exec(
+			"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
+			function (error, stdout, stderr) 
+			{ 
+				console.log(stdout);						
+				
+				var filesProcessed = 0;
+				var filenames = fs.readdirSync("/tmp/vis/");
+				console.log("Found " + filenames.length + " files");
+				for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
+					
+					
+					var filename = filenames[filenamesIndex];									
+					if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
+						console.log("Processing " + filename);
+						
+						var topicId = filename.substr(0, filename.length - 8);
+
+						if (extraData[topicId]) {																				
+							fs.readFile(
+								filename, 
+								'utf8', 
+								(function(myFilenamesIndex, myFilenamesCount) {
+									return function(err, data) {
+										if (!err) {
+											var keywords = data.split("\n");
+											
+											for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
+												
+												var keyword = keywords[keywordsIndex];
+												
+												for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
+													
+													var product = extraData[topicId].products[productsIndex];
+												
+													if (keywordsRsf.length != 0) {
+														keywordsRsf += "\n";
+													}		
+													keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
+												}
+											}
+										}
+										
+										/*
+											If this was the last file to be read, create the rsf file
+										*/
+										++filesProcessed;
+										if (filesProcessed >= myFilenamesCount - 1) {
+											writeToFile();			
+										}
+									}
+								})(filenamesIndex, filenamesCount)
+							);
+							
+						} else {										
+							/*
+								Save the keywords if the last file to be processes was a key file, but
+								did not have any products assigned to it.
+							*/
+							++filesProcessed;
+							if (filesProcessed >= filenamesCount - 1) {
+								writeToFile();			
+							}	
+						}
+					} else {										
+						/*
+							Save the keywords if the last file to be processed was not a key file.
+						*/
+						++filesProcessed;
+						if (filesProcessed >= filenamesCount - 1) {
+							writeToFile();			
+						}	
+					}
+				}
+			}
+		);
+	}
+	
 	$.ajax({
 	  dataType: "json",
 	  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
 	  success: function(cspData) {
-			var cspIndex = 0;
+			var keywordSaveRequest = 0;
+	  	var cspIndex = 0;
 			var cspCount = cspData.items.length;
 			getCSPNodesLoop = function () {
 				if (cspIndex < cspCount) {							
@@ -89,7 +189,8 @@ getContentSpecs = function() {
 								
 								/*
 									Write out the topic's XML as text
-								*/								
+								*/			
+								++keywordSaveRequest;
 								fs.writeFile(
 										"/tmp/vis/" + topic.item.id + ".xml.txt", 
 										topic.item.xml == null ? "" : topic.item.xml.replace(/<.*?>/g, " "), 
@@ -99,6 +200,14 @@ getContentSpecs = function() {
 													console.log(err);
 												} else {
 													console.log("/tmp/vis/" + saveTopic.item.id + ".xml.txt");
+												}
+												
+												/*
+													Only when we have saved the last file
+												*/
+												--keywordSaveRequest;
+												if (cspIndex >= cspCount && keywordSaveRequest <= 0) {
+													saveKeywords();
 												}
 											}
 									})(topic)); 
@@ -187,102 +296,7 @@ getContentSpecs = function() {
 						}
 					});
 					
-					/*
-						Extract the key words
-					*/	
-					console.log("Extracting keywords");
-					
-					var keywordsRsf = "";
-					saveKeywords = function() {
-						fs.writeFile(
-								"/tmp/vis/keywords.rsf", 
-								keywordsRsf, 
-								function(err) {
-									if(err) {
-										console.log(err);
-									} else {
-										console.log("The file /tmp/vis/keywords.rsf was saved!");
-									}
-								}
-							);	
-					};
-					
-					exec(
-						"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
-						function (error, stdout, stderr) 
-						{ 
-							console.log(stdout);						
-							
-							var filesProcessed = 0;
-							var filenames = fs.readdirSync("/tmp/vis/");
-							console.log("Found " + filenames.length + " files");
-							for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
-								
-								
-								var filename = filenames[filenamesIndex];									
-								if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
-									console.log("Processing " + filename);
-									
-									var topicId = filename.substr(0, filename.length - 8);
-
-									if (extraData[topicId]) {																				
-										fs.readFile(
-											filename, 
-											'utf8', 
-											(function(myFilenamesIndex, myFilenamesCount) {
-												return function(err, data) {
-													if (!err) {
-														var keywords = data.split("\n");
-														
-														for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
-															
-															var keyword = keywords[keywordsIndex];
-															
-															for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
-																
-																var product = extraData[topicId].products[productsIndex];
-															
-																if (keywordsRsf.length != 0) {
-																	keywordsRsf += "\n";
-																}		
-																keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
-															}
-														}
-													}
-													
-													/*
-														If this was the last file to be read, create the rsf file
-													*/
-													++filesProcessed;
-													if (filesProcessed >= myFilenamesCount - 1) {
-														saveKeywords();			
-													}
-												}
-											})(filenamesIndex, filenamesCount)
-										);
 										
-									} else {										
-										/*
-											Save the keywords if the last file to be processes was a key file, but
-											did not have any products assigned to it.
-										*/
-										++filesProcessed;
-										if (filesProcessed >= filenamesCount - 1) {
-											saveKeywords();			
-										}	
-									}
-								} else {										
-									/*
-										Save the keywords if the last file to be processed was not a key file.
-									*/
-									++filesProcessed;
-									if (filesProcessed >= filenamesCount - 1) {
-										saveKeywords();			
-									}	
-								}
-							}
-						}
-					);					
 				}
 			}
 			
