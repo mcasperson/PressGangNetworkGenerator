@@ -195,7 +195,7 @@ getContentSpecs = function() {
 													every text file do we then create the keywords graph.
 												*/
 												--keywordSaveRequest;
-												if (cspIndex >= cspCount - 1 && keywordSaveRequest <= 0) {
+												if (cspIndex >= cspCount && keywordSaveRequest <= 0) {
 													saveKeywords();
 												}
 											}
@@ -248,6 +248,14 @@ getContentSpecs = function() {
 						}
 					});
 				} else {				
+					
+					/*
+						The loop has been exited, and there are no more plain text save requests,
+						so generate the keywords.
+					*/
+					if (keywordSaveRequest <= 0) {
+						saveKeywords();
+					}
 					
 					extraData.productFileNames = [];
 					
