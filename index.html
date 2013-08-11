@@ -312,7 +312,12 @@
 								var topicDetails = lines[lineIndex].split("\t");
 								if (topicDetails.length == 8) {
 									if (selectedFilter == "keywords.rsf.lay") {
-										productTopics.push({id: "Keyword:" + topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+										var productTopic = {id: topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])};
+										if (productTopic.id.substr(0, 1) == "\"" && productTopic.id.substr(productTopic.id.length - 1) == "\"") {
+											productTopic.id = productTopic.id.substr(1, productTopic.id.length - 2);
+										}
+										productTopic.id = "Keyword:" + productTopic.id;
+										productTopics.push(productTopic);
 									} else {
 										productTopics.push({id: topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
 									}
