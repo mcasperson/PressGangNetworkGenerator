@@ -104,15 +104,15 @@ getContentSpecs = function() {
 									}
 							);							
 						}
-					} else {										
-						/*
-							Save the keywords if this is the last run through the loop and there are
-							no file loads
-						*/
-						if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
-							writeToFile();			
-						}
-					}
+					} 								
+						
+					/*
+						Save the keywords if this is the last run through the loop and there are
+						no file loads
+					*/
+					if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
+						writeToFile();			
+					}					
 				}
 			}
 		);
@@ -248,6 +248,10 @@ getContentSpecs = function() {
 						}
 					});
 				} else {
+					
+					if (keywordSaveRequest <= 0) {
+						saveKeywords();
+					}
 					
 					extraData.productFileNames = [];
 					
