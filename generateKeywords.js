@@ -60,8 +60,8 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 						extraData[keyword] = {products: [product]};
 					} else {
 						var found = false;
-						for (var productsIndex = 0, productsCount = extraData[keyword].products.length; productsIndex < productsCount; ++productsIndex) {
-							if (extraData[keyword].products[productsIndex] == product) {
+						for (var topicProductsIndex = 0, topicProductsCount = extraData[keyword].products.length; topicProductsIndex < topicProductsCount; ++topicProductsIndex) {
+							if (extraData[keyword].products[topicProductsIndex] == product) {
 								found = true;
 								break;
 							}
