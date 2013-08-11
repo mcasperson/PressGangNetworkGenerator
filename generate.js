@@ -218,7 +218,7 @@ getContentSpecs = function() {
 																
 																for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
 																	
-																	var product = extraData[topicId].products[productsIndex]
+																	var product = extraData[topicId].products[productsIndex];
 																
 																	if (keywordsRsf.length != 0) {
 																		keywordsRsf += "\n";
@@ -232,7 +232,7 @@ getContentSpecs = function() {
 															If this was the last file to be read, create the rsf file
 														*/
 														++filesProcessed;
-														if (filesProcessed == filenamesCount - 1) {
+														if (filesProcessed == myFilenamesCount - 1) {
 																fs.writeFile(
 																	"/tmp/vis/keywords.rsf", 
 																	keywordsRsf, 
