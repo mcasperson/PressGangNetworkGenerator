@@ -87,14 +87,22 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 }
 
 fs.writeFile(
-		"/tmp/vis/keywords.rsf", 
-		keywordsRsf, 
-		function(err) {
-			if(err) {
-				console.log(err);
-			} else {
-				console.log("The file /tmp/vis/keywords.rsf was saved!");
-			}
+	"/tmp/vis/keywords.rsf", 
+	keywordsRsf, 
+	function(err) {
+		if(err) {
+			console.log(err);
+		} else {
+			console.log("The file /tmp/vis/keywords.rsf was saved!");
 		}
-	);		
+	}
+);	
+
+fs.writeFile("/tmp/vis/extradata.js", "extraData = " + JSON.stringify(extraData), function(err) {
+	if(err) {
+		console.log(err);
+	} else {
+		console.log("The file /tmp/vis/extradata.js was saved!");
+	}
+});	
 
