@@ -56,19 +56,19 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 					
 					var product = extraData[topicId].products[productsIndex];
 				
-					if (!extraData[keyword]) {
-						extraData[keyword] = {products: [product]};
+					if (!extraData["Keyword:" + keyword]) {
+						extraData["Keyword:" + keyword] = {products: [product]};
 					} else {
 						var found = false;
-						for (var productsIndex = 0, productsCount = extraData[keyword].products.length; productsIndex < productsCount; ++productsIndex) {
-							if (extraData[keyword].products[productsIndex] == product) {
+						for (var topicProductsIndex = 0, topicProductsCount = extraData["Keyword:" + keyword].products.length; topicProductsIndex < topicProductsCount; ++topicProductsIndex) {
+							if (extraData["Keyword:" + keyword].products[topicProductsIndex] == product) {
 								found = true;
 								break;
 							}
 						}
 						
 						if (!found) {
-							extraData[keyword].products.push(product);								
+							extraData["Keyword:" + keyword].products.push(product);								
 						}
 					}
 				
