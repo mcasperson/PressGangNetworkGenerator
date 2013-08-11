@@ -62,20 +62,19 @@ getContentSpecs = function() {
 				var filenames = fs.readdirSync("/tmp/vis/");
 				console.log("Found " + filenames.length + " files");
 				for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
-					
-					
+
 					var filename = filenames[filenamesIndex];									
 					if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
 						console.log("Processing " + filename);
 						
 						var topicId = filename.substr(0, filename.length - 8);
 
+						++filesProcessed;
 						if (extraData[topicId]) {																				
 							fs.readFile(
 								filename, 
 								'utf8', 
-								(function(myFilenamesIndex, myFilenamesCount) {
-									return function(err, data) {
+								function(err, data) {
 										if (!err) {
 											var keywords = data.split("\n");
 											
@@ -98,12 +97,11 @@ getContentSpecs = function() {
 										/*
 											If this was the last file to be read, create the rsf file
 										*/
-										++filesProcessed;
-										if (filesProcessed >= myFilenamesCount - 1) {
+										--filesProcessed;
+										if (filenamesIndex >= filenamesCount && filesProcessed <= 0) {
 											writeToFile();			
 										}
 									}
-								})(filenamesIndex, filenamesCount)
 							);
 							
 						} else {										
