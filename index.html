@@ -129,6 +129,8 @@
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
+			var layoutType;
+			
 			var container, stats;
 
 			var camera, scene, renderer;
@@ -188,6 +190,7 @@
 				}
 
 				filteredTopics = topics;
+				layoutType = "topics";
 				
 				init();
 				animate();
@@ -235,9 +238,12 @@
 					var selectedText = "Topic ID: " + closestCollision.topic.id + "<br/>Products: ";
 					if (extraData[closestCollision.topic.id]) {
 
-						var products = productTopics != null ? 
-							extraData[closestCollision.topic.id].productVersionAndTitles : 
-							extraData[closestCollision.topic.id].products;
+						var products;
+						if (layoutType == "producttopics")  {
+							products = extraData[closestCollision.topic.id].productVersionAndTitles;
+						} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
+							products = extraData[closestCollision.topic.id].products;
+						}
 							
 						if (products) {
 							for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
@@ -262,10 +268,12 @@
 
 				if (selectedFilter == "0") {
 					filteredTopics = topics;
+					layoutType = "topics";
 					
 					createParticles();
 				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3") {
 					filteredTopics = [];					
+					layoutType = "filteredtopics";
 					
 					for (var topicIndex = 0, topicCount = topics.length; topicIndex < topicCount; ++topicIndex) {
 						var topic = topics[topicIndex];
@@ -292,6 +300,12 @@
 					  dataType: "text",
 					  url: selectedFilter,
 					  success: function(topicData) {
+						if (selectedFilter == "keywords.rsf.lay") {
+							layoutType = "keywords";
+						} else {
+							layoutType = "producttopics";
+						}
+						
 						var lines = topicData.split("\n");
 						for (var lineIndex = 0, lineCount = lines.length; lineIndex < lineCount; ++lineIndex) {
 							if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
@@ -348,7 +362,12 @@
 			}
 			
 			function createParticles() {
-				var displayedTopics = productTopics == null ? filteredTopics : productTopics;
+				var displayedTopics;
+				if (layoutType == "topics" || layoutType == "filteredtopics") {
+					displayedTopics = filteredTopics;
+				} else if (layoutType == "producttopics" || layoutType == "keywords") {
+					displayedTopics = productTopics;
+				}
 				
 				var particleCount = displayedTopics.length;
 				
