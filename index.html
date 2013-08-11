@@ -565,79 +565,7 @@
 			function render() {				
 				listProductsInFrustum();
 				renderer.render( scene, camera );
-			}
-			
-			function sortProductsByDistance() {
-				
-				var productDistances = {};
-				for (var collidersIndex = 0, collidersCount = colliders.length; collidersIndex < collidersCount; ++collidersIndex) {
-					var collisionSphere = colliders[collidersIndex];
-					if (extraData[collisionSphere.topic.id]) {	
-						var products;
-						if (layoutType == "producttopics")  {
-							products = extraData[collisionSphere.topic.id].productVersionAndTitles;
-						} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
-							products = extraData[collisionSphere.topic.id].products;
-						}
-						
-						var distFromCamera = camera.position.distanceToSquared(collisionSphere.center);
-						
-						for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
-							var product = products[productsIndex];
-							if (!productDistances[product]) {
-								productDistances[product] = {distFromCamera: distFromCamera, count: 1};
-							} else {
-								productDistances[product].distFromCamera += distFromCamera;
-								productDistances[product].count += 1;
-							}
-						}
-					}
-				}
-				
-				for (var key in productDistances) productDistances[key].averageDistFromCamera = productDistances[key].distFromCamera / productDistances[key].count;
-				
-				var sorted = bySortedValueAndReturn(productDistances);
-				
-				if (sorted.length != 0)	{
-					var smallestDistance = sorted[0][1].averageDistFromCamera;
-					var largestDistance = sorted[sorted.length - 1][1].averageDistFromCamera;
-					var range = largestDistance - smallestDistance;
-									
-					var myProductsList = [];
-					for (var sortedIndex = 0, sortedCount = sorted.length; sortedIndex < sortedCount; ++sortedIndex) {
-						var visiableProduct = sorted[sortedIndex][0];
-						var visiableProductDistance = sorted[sortedIndex][1].averageDistFromCamera;
-						
-						var visiableProductRange = (100 - ((visiableProductDistance - smallestDistance) / range * 100)).toFixed(2);
-						
-						var tableChild = document.createElement("div");
-						tableChild.innerText = visiableProduct + " [" + visiableProductRange + "%]";
-						tableChild.style.color = productColors[visiableProduct].getStyle();
-						myProductsList.push(tableChild);
-					}
-					
-					var changes = false;
-					if (productsList.length != myProductsList.length) {
-						changes = true;
-					} else {
-						for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-							if (productsList[productsListIndex] != myProductsList[productsListIndex]) {
-								changes = true;
-								break;
-							}
-						}
-					}
-
-					if (changes) {
-						var table = document.getElementById("table");
-						table.innerHTML = '';
-						for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-							table.appendChild(myProductsList[productsListIndex]);
-						}					
-						productList = myProductsList;
-					}
-				}
-			}
+			}			
 			
 			function bySortedValueAndReturn(obj) {
 				var tuples = [];
@@ -649,6 +577,10 @@
 				return tuples;
 			}
 			
+			/**
+				Displays a list of products that fall within the cameras view, and sorts the list so the products with the closest
+				nodes are listed at the top.
+			*/
 			function listProductsInFrustum() {
 				var frustum = new THREE.Frustum;
 				frustum.setFromMatrix( new THREE.Matrix4().multiply( camera.projectionMatrix, camera.matrixWorldInverse ) );
