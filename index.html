@@ -609,6 +609,9 @@
 									productDistances[product].count += 1;
 								}
 								
+								/*
+									This is used to weight products that have topics close to the camera.
+								*/
 								if (distFromCamera < 20000) {
 									productDistances[product].weightedCount += 1;
 								}
@@ -618,6 +621,10 @@
 				}
 				
 				for (var key in productDistances) productDistances[key].averageDistFromCamera = productDistances[key].distFromCamera / productDistances[key].count;
+				
+				/*
+					Every topic close to the camera reduces the weighted distance.
+				*/
 				for (var key in productDistances) productDistances[key].weightedDistFromCamera = productDistances[key].averageDistFromCamera - (productDistances[key].weightedCount * 5000);
 				
 				var sorted = bySortedValueAndReturn(productDistances);
