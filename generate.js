@@ -223,6 +223,9 @@ getContentSpecs = function() {
 										console.log("Processing " + filename);
 										
 										var topicId = filename.substr(0, filename.length - 8);
+										
+										++filesProcessed;
+										
 										if (extraData[topicId]) {																				
 											fs.readFile(
 												filename, 
@@ -251,8 +254,7 @@ getContentSpecs = function() {
 														/*
 															If this was the last file to be read, create the rsf file
 														*/
-														++filesProcessed;
-														if (filesProcessed == myFilenamesCount - 1) {
+														if (filesProcessed >= myFilenamesCount - 1) {
 															saveKeywords();			
 														}
 													}
@@ -260,8 +262,8 @@ getContentSpecs = function() {
 											);
 											
 										} else {
-											++filesProcessed;
-											if (filesProcessed == filenamesCount - 1) {
+											
+											if (filesProcessed >= filenamesCount - 1) {
 												saveKeywords();			
 											}	
 										}
