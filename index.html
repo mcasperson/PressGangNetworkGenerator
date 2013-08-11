@@ -671,10 +671,14 @@
 							for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
 								var product = products[productsIndex];
 								if (!productDistances[product]) {
-									productDistances[product] = {distFromCamera: distFromCamera, count: 1};
+									productDistances[product] = {distFromCamera: distFromCamera, count: 1, weightedCount: 0};
 								} else {
 									productDistances[product].distFromCamera += distFromCamera;
 									productDistances[product].count += 1;
+								}
+								
+								if (distFromCamera < 20000) {
+									productDistances[product].weightedCount += 1;
 								}
 							}
 						}
@@ -682,7 +686,7 @@
 				}
 				
 				for (var key in productDistances) productDistances[key].averageDistFromCamera = productDistances[key].distFromCamera / productDistances[key].count;
-				for (var key in productDistances) productDistances[key].weightedDistFromCamera = productDistances[key].averageDistFromCamera / (productDistances[key].count / 10);
+				for (var key in productDistances) productDistances[key].weightedDistFromCamera = productDistances[key].averageDistFromCamera - (productDistances[key].weightedCount * 5000);
 				
 				var sorted = bySortedValueAndReturn(productDistances);
 				
