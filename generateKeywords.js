@@ -45,7 +45,7 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 			/*
 				Loop over each keyword
 			*/
-			for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
+			for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywordsIndex) {													
 				
 				var keyword = keywords[keywordsIndex];
 				
