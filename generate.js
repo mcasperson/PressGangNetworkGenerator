@@ -98,7 +98,7 @@ getContentSpecs = function() {
 											If this was the last file to be read, create the rsf file
 										*/
 										--filesProcessed;
-										if (filenamesIndex >= filenamesCount && filesProcessed <= 0) {
+										if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
 											writeToFile();			
 										}
 									}
@@ -109,7 +109,7 @@ getContentSpecs = function() {
 								Save the keywords if the last file to be processes was a key file, but
 								did not have any products assigned to it.
 							*/
-							if (filenamesIndex >= filenamesCount && filesProcessed <= 0) {
+							if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
 								writeToFile();			
 							}	
 						}
@@ -117,7 +117,7 @@ getContentSpecs = function() {
 						/*
 							Save the keywords if the last file to be processed was not a key file.
 						*/
-						if (filenamesIndex >= filenamesCount && filesProcessed <= 0) {
+						if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
 							writeToFile();			
 						}
 					}
@@ -203,7 +203,7 @@ getContentSpecs = function() {
 													every text file do we then create the keywords graph.
 												*/
 												--keywordSaveRequest;
-												if (cspIndex >= cspCount && keywordSaveRequest <= 0) {
+												if (cspIndex >= cspCount - 1 && keywordSaveRequest <= 0) {
 													saveKeywords();
 												}
 											}
