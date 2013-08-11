@@ -92,7 +92,6 @@ getContentSpecs = function() {
 						dataType: "json",
 						url: topicsInContentSpec.replace("#CSPID#", csp.item.id) + encodeURIComponent(JSON.stringify(queryExpand)),
 						success: function(topicData) {
-							--topicRequest;
 							
 							for (var topicIndex = 0, topicCount = topicData.items.length; topicIndex < topicCount; ++topicIndex) {
 								var topic = topicData.items[topicIndex];
