@@ -170,7 +170,7 @@
 				var productFileName = extraData.productFileNames[productFileNamesIndex];
 				
 				var objOption = document.createElement("option")
-				objOption.innerHTML = productFileName.product;
+				objOption.innerHTML = productFileName.product.trim().length == 0 ? "[UNDEFINED]" : productFileName.product.trim();
 				objOption.value = "product-" + productFileName.filename;
 				optGroup.appendChild(objOption);
 			}
