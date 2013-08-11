@@ -89,7 +89,7 @@ getContentSpecs = function() {
 								/*
 									Write out the topic's XML as text
 								*/								
-								fs.writeFile("/tmp/vis/" + topic.id + ".xml.txt", topic.xml.replace(/<.*?>/g, " "), function(err) {
+								fs.writeFile("/tmp/vis/" + topic.id + ".xml.txt", topic.item.xml.replace(/<.*?>/g, " "), function(err) {
 									if(err) {
 										console.log(err);
 									} else {
