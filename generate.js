@@ -203,7 +203,8 @@ getContentSpecs = function() {
 												}
 												
 												/*
-													Only when we have saved the last file
+													Only when we have processed the last content spec and saved
+													every text file do we then create the keywords graph.
 												*/
 												--keywordSaveRequest;
 												if (cspIndex >= cspCount && keywordSaveRequest <= 0) {
