@@ -68,9 +68,9 @@ getContentSpecs = function() {
 						console.log("Processing " + filename);
 						
 						var topicId = filename.substr(0, filename.length - 8);
-
-						++filesProcessed;
-						if (extraData[topicId]) {																				
+						
+						if (extraData[topicId]) {		
+							++filesProcessed;
 							fs.readFile(
 								filename, 
 								'utf8', 
