@@ -563,7 +563,7 @@
 			}
 
 			function render() {				
-				sortProductsByDistance();
+				listProductsInFrustum();
 				renderer.render( scene, camera );
 			}
 			
@@ -585,7 +585,7 @@
 						for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
 							var product = products[productsIndex];
 							if (!productDistances[product]) {
-								productDistances[product] = {distFromCamera: distFromCamera, count: 0};
+								productDistances[product] = {distFromCamera: distFromCamera, count: 1};
 							} else {
 								productDistances[product].distFromCamera += distFromCamera;
 								productDistances[product].count += 1;
@@ -597,35 +597,45 @@
 				for (var key in productDistances) productDistances[key].averageDistFromCamera = productDistances[key].distFromCamera / productDistances[key].count;
 				
 				var sorted = bySortedValueAndReturn(productDistances);
-								
-				var myProductsList = [];
-				for (var sortedIndex = 0, sortedCount = sorted.length; sortedIndex < sortedCount; ++sortedIndex) {
-					var visiableProduct = sorted[sortedIndex][0];
-					var tableChild = document.createElement("div");
-					tableChild.innerText = visiableProduct;
-					tableChild.style.color = productColors[visiableProduct].getStyle();
-					myProductsList.push(tableChild);
-				}
 				
-				var changes = false;
-				if (productsList.length != myProductsList.length) {
-					changes = true;
-				} else {
-					for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-						if (productsList[productsListIndex] != myProductsList[productsListIndex]) {
-							changes = true;
-							break;
+				if (sorted.length != 0)	{
+					var smallestDistance = sorted[0][1].averageDistFromCamera;
+					var largestDistance = sorted[sorted.length - 1][1].averageDistFromCamera;
+					var range = largestDistance - smallestDistance;
+									
+					var myProductsList = [];
+					for (var sortedIndex = 0, sortedCount = sorted.length; sortedIndex < sortedCount; ++sortedIndex) {
+						var visiableProduct = sorted[sortedIndex][0];
+						var visiableProductDistance = sorted[sortedIndex][1].averageDistFromCamera;
+						
+						var visiableProductRange = (100 - ((visiableProductDistance - smallestDistance) / range * 100)).toFixed(2);
+						
+						var tableChild = document.createElement("div");
+						tableChild.innerText = visiableProduct + " [" + visiableProductRange + "%]";
+						tableChild.style.color = productColors[visiableProduct].getStyle();
+						myProductsList.push(tableChild);
+					}
+					
+					var changes = false;
+					if (productsList.length != myProductsList.length) {
+						changes = true;
+					} else {
+						for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+							if (productsList[productsListIndex] != myProductsList[productsListIndex]) {
+								changes = true;
+								break;
+							}
 						}
 					}
-				}
 
-				if (changes) {
-					var table = document.getElementById("table");
-					table.innerHTML = '';
-					for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-						table.appendChild(myProductsList[productsListIndex]);
-					}					
-					productList = myProductsList;
+					if (changes) {
+						var table = document.getElementById("table");
+						table.innerHTML = '';
+						for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+							table.appendChild(myProductsList[productsListIndex]);
+						}					
+						productList = myProductsList;
+					}
 				}
 			}
 			
@@ -634,7 +644,7 @@
 
 				for (var key in obj) tuples.push([key, obj[key]]);
 
-				tuples.sort(function(a, b) { return a[1].averageDistFromCamera < b[1].averageDistFromCamera ? -1 : a[1].averageDistFromCamera > b[1].averageDistFromCamera ? 1 : 0 });
+				tuples.sort(function(a, b) { return a[1].weightedDistFromCamera < b[1].weightedDistFromCamera ? -1 : a[1].weightedDistFromCamera > b[1].weightedDistFromCamera ? 1 : 0 });
 				
 				return tuples;
 			}
@@ -643,7 +653,7 @@
 				var frustum = new THREE.Frustum;
 				frustum.setFromMatrix( new THREE.Matrix4().multiply( camera.projectionMatrix, camera.matrixWorldInverse ) );
 				
-				var visibleProducts = [];
+				var productDistances = {};
 				
 				for (var collidersIndex = 0, collidersCount = colliders.length; collidersIndex < collidersCount; ++collidersIndex) {
 					var collisionSphere = colliders[collidersIndex];
@@ -655,61 +665,65 @@
 							} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
 								products = extraData[collisionSphere.topic.id].products;
 							}
-							
+
+							var distFromCamera = camera.position.distanceToSquared(collisionSphere.center);
+				
 							for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
 								var product = products[productsIndex];
-								
-								var found = false;
-								for (var visibleProductsIndex = 0, visibleProductsCount = visibleProducts.length; visibleProductsIndex < visibleProductsCount; ++visibleProductsIndex) {
-									if (visibleProducts[visibleProductsIndex] == product) {
-										found = true;
-										break;
-									}
-								}
-								
-								if (!found) {
-									visibleProducts.push(product);
+								if (!productDistances[product]) {
+									productDistances[product] = {distFromCamera: distFromCamera, count: 1};
+								} else {
+									productDistances[product].distFromCamera += distFromCamera;
+									productDistances[product].count += 1;
 								}
 							}
 						}
 					}
 				}
 				
-				// Assign colours to products				
-				var myProductsList = [];
-				for (var visibleProductsIndex = 0, visibleProductsCount = visibleProducts.length; visibleProductsIndex < visibleProductsCount; ++visibleProductsIndex) {
-					var visiableProduct = visibleProducts[visibleProductsIndex];
-					var tableChild = document.createElement("div");
-					tableChild.innerText = visiableProduct;
-					tableChild.style.color = productColors[visiableProduct].getStyle();
-					myProductsList.push(tableChild);
-				}
+				for (var key in productDistances) productDistances[key].averageDistFromCamera = productDistances[key].distFromCamera / productDistances[key].count;
+				for (var key in productDistances) productDistances[key].weightedDistFromCamera = productDistances[key].averageDistFromCamera / (productDistances[key].count / 10);
 				
-				myProductsList.sort(function(a,b) {
-					if (a.innerText < b.innerText) return -1;
-					if (a.innerText > b.innerText) return 1;
-					return 0;
-				});
+				var sorted = bySortedValueAndReturn(productDistances);
 				
-				var changes = false;
-				if (productsList.length != myProductsList.length) {
-					changes = true;
-				} else {
-					for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-						if (productsList[productsListIndex] != myProductsList[productsListIndex]) {
-							changes = true;
-							break;
+				if (sorted.length != 0)	{
+					var smallestDistance = sorted[0][1].weightedDistFromCamera;
+					var largestDistance = sorted[sorted.length - 1][1].weightedDistFromCamera;
+					var range = largestDistance - smallestDistance;
+									
+					var myProductsList = [];
+					for (var sortedIndex = 0, sortedCount = sorted.length; sortedIndex < sortedCount; ++sortedIndex) {
+						var visiableProduct = sorted[sortedIndex][0];
+						var visiableProductDistance = sorted[sortedIndex][1].weightedDistFromCamera;
+						
+						var visiableProductRange = (100 - ((visiableProductDistance - smallestDistance) / range * 100)).toFixed(2);
+						
+						var tableChild = document.createElement("div");
+						tableChild.innerText = visiableProduct + " [" + visiableProductRange + "%]";
+						tableChild.style.color = productColors[visiableProduct].getStyle();
+						myProductsList.push(tableChild);
+					}
+					
+					var changes = false;
+					if (productsList.length != myProductsList.length) {
+						changes = true;
+					} else {
+						for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+							if (productsList[productsListIndex] != myProductsList[productsListIndex]) {
+								changes = true;
+								break;
+							}
 						}
 					}
-				}
 
-				if (changes) {
-					var table = document.getElementById("table");
-					table.innerHTML = '';
-					for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-						table.appendChild(myProductsList[productsListIndex]);
-					}					
-					productList = myProductsList;
+					if (changes) {
+						var table = document.getElementById("table");
+						table.innerHTML = '';
+						for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+							table.appendChild(myProductsList[productsListIndex]);
+						}					
+						productList = myProductsList;
+					}
 				}
 			}
 
