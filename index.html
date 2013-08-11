@@ -583,7 +583,7 @@
 			*/
 			function listProductsInFrustum() {
 				var frustum = new THREE.Frustum;
-				frustum.setFromMatrix( new THREE.Matrix4().multiply( camera.projectionMatrix, camera.matrixWorldInverse ) );
+				frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
 				
 				var productDistances = {};
 				
@@ -629,7 +629,9 @@
 				
 				var sorted = bySortedValueAndReturn(productDistances);
 				
-				if (sorted.length != 0)	{
+				var table = document.getElementById("table");
+				
+				if (sorted.length != 0 && (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords"))	{
 					var smallestDistance = sorted[0][1].weightedDistFromCamera;
 					var largestDistance = sorted[sorted.length - 1][1].weightedDistFromCamera;
 					var range = largestDistance - smallestDistance;
@@ -661,14 +663,15 @@
 						}
 					}
 
-					if (changes) {
-						var table = document.getElementById("table");
+					if (changes) {						
 						table.innerHTML = '';
 						for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
 							table.appendChild(myProductsList[productsListIndex]);
 						}					
 						productList = myProductsList;
 					}
+				} else {
+					table.innerHTML = '';
 				}
 			}
 
