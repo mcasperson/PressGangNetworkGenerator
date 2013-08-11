@@ -123,6 +123,7 @@ getContentSpecs = function() {
 	  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
 	  success: function(cspData) {
 			var keywordSaveRequest = 0;
+			var topicRequest = 0;
 	  	var cspIndex = 0;
 			var cspCount = cspData.items.length;
 			getCSPNodesLoop = function () {
@@ -168,17 +169,20 @@ getContentSpecs = function() {
 					
 					++cspIndex;
 					
-					++keywordSaveRequest;
+					++topicRequest;					
 					$.ajax({
 						dataType: "json",
 						url: topicsInContentSpec.replace("#CSPID#", csp.item.id) + encodeURIComponent(JSON.stringify(queryExpand)),
 						success: function(topicData) {
+							--topicRequest;
+							
 							for (var topicIndex = 0, topicCount = topicData.items.length; topicIndex < topicCount; ++topicIndex) {
 								var topic = topicData.items[topicIndex];
 								
 								/*
 									Write out the topic's XML as text
-								*/											
+								*/	
+								++keywordSaveRequest;
 								fs.writeFile(
 										"/tmp/vis/" + topic.item.id + ".xml.txt", 
 										topic.item.xml == null ? "" : topic.item.xml.replace(/<.*?>/g, " "), 
@@ -193,7 +197,7 @@ getContentSpecs = function() {
 													every text file do we then create the keywords graph.
 												*/
 												--keywordSaveRequest;
-												if (cspIndex >= cspCount && keywordSaveRequest <= 0) {
+												if (cspIndex >= cspCount && topicRequest <= 0 && keywordSaveRequest <= 0) {
 													saveKeywords();
 												}
 											}
@@ -251,7 +255,7 @@ getContentSpecs = function() {
 						The loop has been exited, and there are no more plain text save requests,
 						so generate the keywords.
 					*/
-					if (keywordSaveRequest <= 0) {
+					if (keywordSaveRequest <= 0 && topicRequest <= 0) {
 						saveKeywords();
 					}
 					
