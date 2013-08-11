@@ -91,6 +91,10 @@ getContentSpecs = function() {
 					if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
 						console.log("Processing " + filename);
 						
+						/*
+							Filenames are in the format 12345.xml.key. Removing the last 8 characters
+							gets the topic id.
+						*/
 						var topicId = filename.substr(0, filename.length - 8);
 						
 						if (extraData[topicId]) {		
@@ -101,19 +105,33 @@ getContentSpecs = function() {
 								(function(myFilename) {
 									return function(err, data) {
 										if (!err) {											
+											
+											/*
+												Keyword files include a keyword on each line
+											*/
 											var keywords = data.split("\n");
 											
+											/*
+												Loop over ech keyword
+											*/
 											for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
 												
 												var keyword = keywords[keywordsIndex];
 												
+												/*
+													Loop over each product
+												*/
 												for (var productsIndex = 0, productsCount = extraData[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
 													
 													var product = extraData[topicId].products[productsIndex];
 												
 													if (keywordsRsf.length != 0) {
 														keywordsRsf += "\n";
-													}		
+													}	
+													
+													/*
+														Link the product to the keyword
+													*/
 													keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
 												}
 											}
