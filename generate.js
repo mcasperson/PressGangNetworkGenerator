@@ -1,6 +1,5 @@
 var $ = require('jquery');
 var fs = require('fs');
-var exec = require('child_process').exec;
 						
 finished = function(data) {
 	console.log(JSON.stringify(data));
@@ -30,111 +29,6 @@ getContentSpecs = function() {
 	var titleRe = /Title\s*=\s*(.*?)\s*$/;
 	
 	console.log("Getting content spec IDs");
-	
-	/**
-		Calls the Maui keyword extraction tool, loops over the resulting .key files and
-		creates a graph linking the product that included the topic to the keyword in a file
-		called /tmp/vis/keywords.rsf.
-	*/
-	saveKeywords = function() {
-		console.log("Extracting keywords");
-		
-		/*
-			The string that will hold the RSF data as it is built up
-		*/
-		var keywordsRsf = "";
-		
-		/**
-			The function that saves the /tmp/vis/keywords.rsf file
-		*/
-		writeToFile = function() {
-			fs.writeFile(
-					"/tmp/vis/keywords.rsf", 
-					keywordsRsf, 
-					function(err) {
-						if(err) {
-							console.log(err);
-						} else {
-							console.log("The file /tmp/vis/keywords.rsf was saved!");
-						}
-					}
-				);	
-		};
-		
-		/*
-			Call Maui to generate the key files
-		*/
-		exec(
-			"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
-			function (error, stdout, stderr) 
-			{ 
-				console.log(stdout);						
-				
-				/*
-					Get all the files in the temp dir
-				*/
-				var filenames = fs.readdirSync("/tmp/vis/");
-				console.log("Found " + filenames.length + " files");
-				
-				/*
-					Loop over the files
-				*/
-				for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
-
-					var filename = filenames[filenamesIndex];									
-					
-					/*
-						We are only interested in the .key files
-					*/
-					if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
-						console.log("Processing " + filename);
-						
-						/*
-							Filenames are in the format 12345.xml.key. Removing the last 8 characters
-							gets the topic id.
-						*/
-						var topicId = filename.substr(0, filename.length - 8);
-						
-						if (extraData[topicId]) {		
-							var data = fs.readFileSync("/tmp/vis/" + filename, 'utf8'); 
-			
-							/*
-								Keyword files include a keyword on each line
-							*/
-							var keywords = data.split("\n");
-							
-							/*
-								Loop over ech keyword
-							*/
-							for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
-								
-								var keyword = keywords[keywordsIndex];
-								
-								/*
-									Loop over each product
-								*/
-								for (var productsIndex = 0, productsCount = extraData[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
-									
-									var product = extraData[topicId].products[productsIndex];
-								
-									if (keywordsRsf.length != 0) {
-										keywordsRsf += "\n";
-									}	
-									
-									/*
-										Link the product to the keyword
-									*/
-									keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
-								}
-							}							
-						}
-					} 											
-				}
-				
-				writeToFile();	
-			}
-		);
-	}
 	
 	/*
 		Make a REST to to get the content specs in the system
