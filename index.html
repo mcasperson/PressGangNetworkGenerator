@@ -63,10 +63,13 @@
 		<button type="button" class="reset" onclick="controls.reset()">Reset Camera</button>
 		<select class="filter" id="filter" onchange="filterTopics()">
 			<optgroup label="Global Filters">
-				<option value="0">None</option>
+				<option value="0">All Topics</option>
 				<option value="1">More than 2 Products</option>
 				<option value="2">More than 3 Products</option>
 				<option value="3">More than 5 Products</option>
+			</optgroup>
+			<optgroup label="Keywords">
+				<option value="keywords.rsf.lay">All Topics</option>
 			</optgroup>
 		</select>
 		<div id="table" class="productTable"></div>
@@ -138,7 +141,7 @@
 			
 			var filteredTopics;
 			
-			var particleSystem;
+			var particleSystems;
 			
 			var colliders = [];
 			
@@ -294,7 +297,7 @@
 							if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
 								var topicDetails = lines[lineIndex].split("\t");
 								if (topicDetails.length == 8) {
-									productTopics.push({id: Number(topicDetails[5]), x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+									productTopics.push({id: topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
 								}
 							}
 						}
@@ -312,14 +315,7 @@
 				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 5, 100000 );
 				camera.position.z = 7500;								
 
-				scene = new THREE.Scene();
-				
-				attributes = {
-	
-					size: {	type: 'f', value: [] },
-					customColor: { type: 'c', value: [] }
-	
-				};
+				scene = new THREE.Scene();			
 	
 				uniforms = {
 	
@@ -329,18 +325,7 @@
 	
 				};				
 				
-				shaderMaterial = new THREE.ShaderMaterial( {
-
-					uniforms: 		uniforms,
-					attributes:     attributes,
-					vertexShader:   document.getElementById( 'vertexshader' ).textContent,
-					fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-	
-					blending: 		THREE.AdditiveBlending,
-					depthTest: 		false,
-					transparent:	true
-	
-				});
+				
 
 				renderer = new THREE.WebGLRenderer( { antialias: false, clearColor: 0x333333, clearAlpha: 1, alpha: false } );
 				/*renderer = Detector.webgl ? 
@@ -375,9 +360,12 @@
 				for(var p = 0; p < particleCount; p++) {
 					if (extraData[displayedTopics[p].id]) {
 						var products = extraData[displayedTopics[p].id].products;
-						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
-							if (!displayedProducts[products[topicProductIndex]]) {
-								displayedProducts[products[topicProductIndex]] = true;
+						// this will be null if the products have not be assigned (like with keywords)
+						if (products) {
+							for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
+								if (!displayedProducts[products[topicProductIndex]]) {
+									displayedProducts[products[topicProductIndex]] = true;
+								}
 							}
 						}
 					}
@@ -419,62 +407,107 @@
 					table.appendChild(productsList[productsListIndex]);
 				}
 
-				// create the particle variables
-				var particles = new THREE.Geometry();
-				var values_size = attributes.size.value;
-				var values_color = attributes.customColor.value;
-				    
-				// now create the individual particles
-				for(var p = 0; p < particleCount; p++) {
+				// Remove any existing systems
+				if (particleSystems != null) {
+					for (var particleSystemsIndex = 0, particleSystemsCount = particleSystems.length; particleSystemsIndex < particleSystemsCount; ++particleSystemsIndex) {
+						scene.remove(particleSystems[particleSystemsIndex]);
+					}					
+				}
+				
+				particleSystems = [];
+				var maxZ;
+				
+				// Loop over the topics, create a new particle system for every 10000
+				// particles.
+				var maxVerts = 10000;
+				for (var vertexIndex = 0; vertexIndex < particleCount; vertexIndex += maxVerts) {
+					(function() {
+						var attributes = {
+							size: {	type: 'f', value: [] },
+							customColor: { type: 'c', value: [] }		
+						};
+						
+						var shaderMaterial = new THREE.ShaderMaterial( {
+							uniforms: 		uniforms,
+							attributes:     attributes,
+							vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+							fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+			
+							blending: 		THREE.AdditiveBlending,
+							depthTest: 		false,
+							transparent:	true			
+						});
+						
+						// create the particle variables
+						var particles = new THREE.Geometry();
+						var values_size = attributes.size.value;
+						var values_color = attributes.customColor.value;
+							
+						// now create the individual particles
+						//for(var p = 0; p < particleCount; p++) {						
+						for (var p = vertexIndex; p < (vertexIndex + maxVerts < particleCount ? vertexIndex + maxVerts : particleCount); ++p) {
 
-					var pX = displayedTopics[p].x,
-						pY = displayedTopics[p].y,
-						pZ = displayedTopics[p].z,
-						particle = new THREE.Vector3(pX, pY, pZ);
-					  
-					values_size[ p ] = 50;// + (10 * displayedTopics[p].size);
-					
-					var sphereCollider = new THREE.Sphere(particle, 10);
-					sphereCollider.particle = particle;
-					sphereCollider.topic = displayedTopics[p];
-					colliders.push(sphereCollider);
-					
-					var r = 0, g = 0, b = 0;
+							var pX = displayedTopics[p].x,
+								pY = displayedTopics[p].y,
+								pZ = displayedTopics[p].z,
+								particle = new THREE.Vector3(pX, pY, pZ);
+							  
+							values_size[ p % maxVerts ] = 50;// + (10 * displayedTopics[p].size);
+							
+							var sphereCollider = new THREE.Sphere(particle, 10);
+							sphereCollider.particle = particle;
+							sphereCollider.topic = displayedTopics[p];
+							colliders.push(sphereCollider);
+							
+							
+							values_color[ p % maxVerts ] = new THREE.Color();
+							
+							if (extraData[displayedTopics[p].id]) {
+								var products = extraData[displayedTopics[p].id].products;
+								// this will be null if the products have not be assigned (like with keywords)
+								if (products) {
+									var r = 0, g = 0, b = 0;
+									
+									for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
+										r += productColors[products[topicProductIndex]].r;
+										g += productColors[products[topicProductIndex]].g;
+										b += productColors[products[topicProductIndex]].b;
+									}
+									
+									values_color[ p % maxVerts ].setRGB(r / topicProductCount, g / topicProductCount, b / topicProductCount);
+								} else {
+									values_color[ p % maxVerts ].setRGB(32, 32, 32);
+								}
+							}
+							
 
-					if (extraData[displayedTopics[p].id]) {
-						var products = extraData[displayedTopics[p].id].products;
-						for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
-							r += productColors[products[topicProductIndex]].r;
-							g += productColors[products[topicProductIndex]].g;
-							b += productColors[products[topicProductIndex]].b;
+							
+
+							// add it to the geometry
+							particles.vertices.push(particle);
 						}
-					}
-					
-					values_color[ p ] = new THREE.Color();
-					values_color[ p ].setRGB(r / topicProductCount, g / topicProductCount, b / topicProductCount);
+						
+						particles.computeBoundingSphere();
+						if (maxZ == null || maxZ < particles.boundingSphere.radius) {
+							maxZ = particles.boundingSphere.radius;
+						}
 
-					// add it to the geometry
-					particles.vertices.push(particle);
+						// create the particle system
+						var particleSystem =
+						  new THREE.ParticleSystem(
+							particles,
+							shaderMaterial);
+							
+						particleSystems.push(particleSystem);
+						
+						// add it to the scene
+						scene.add(particleSystem);
+					})();
 				}
-				
-				particles.computeBoundingSphere();
+
 				controls.position0.x = controls.position0.y = 0;
-				controls.position0.z = particles.boundingSphere.radius * 5;
+				controls.position0.z = maxZ * 5;
 				controls.reset();
-				
-				if (particleSystem != null) {
-					scene.remove(particleSystem);
-					particleSystem = null;
-				}
-				
-				// create the particle system
-				particleSystem =
-				  new THREE.ParticleSystem(
-				    particles,
-				    shaderMaterial);
-				
-				// add it to the scene
-				scene.add(particleSystem);
 			}
 			
 			function setupControls() {
