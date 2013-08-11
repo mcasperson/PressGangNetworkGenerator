@@ -247,11 +247,7 @@ getContentSpecs = function() {
 							getCSPNodesLoop();	
 						}
 					});
-				} else {
-					
-					if (keywordSaveRequest <= 0) {
-						saveKeywords();
-					}
+				} else {				
 					
 					extraData.productFileNames = [];
 					
