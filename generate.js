@@ -109,7 +109,6 @@ getContentSpecs = function() {
 								Save the keywords if the last file to be processes was a key file, but
 								did not have any products assigned to it.
 							*/
-							--filesProcessed;
 							if (filenamesIndex >= filenamesCount && filesProcessed <= 0) {
 								writeToFile();			
 							}	
@@ -118,7 +117,6 @@ getContentSpecs = function() {
 						/*
 							Save the keywords if the last file to be processed was not a key file.
 						*/
-						--filesProcessed;
 						if (filenamesIndex >= filenamesCount && filesProcessed <= 0) {
 							writeToFile();			
 						}
