@@ -82,7 +82,7 @@ getContentSpecs = function() {
 												
 												var keyword = keywords[keywordsIndex];
 												
-												for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
+												for (var productsIndex = 0, productsCount = extraData[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
 													
 													var product = extraData[topicId].products[productsIndex];
 												
