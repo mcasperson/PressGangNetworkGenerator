@@ -37,8 +37,6 @@ getContentSpecs = function() {
 	  dataType: "json",
 	  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
 	  success: function(cspData) {
-			var keywordSaveRequest = 0;
-			var topicRequest = 0;
 	  	var cspIndex = 0;
 			var cspCount = cspData.items.length;
 			getCSPNodesLoop = function () {
@@ -89,11 +87,7 @@ getContentSpecs = function() {
 					}
 					
 					++cspIndex;
-					
-					/*
-						Make a REST to to get the topics assigned to the content spec
-					*/
-					++topicRequest;					
+									
 					$.ajax({
 						dataType: "json",
 						url: topicsInContentSpec.replace("#CSPID#", csp.item.id) + encodeURIComponent(JSON.stringify(queryExpand)),
@@ -116,15 +110,6 @@ getContentSpecs = function() {
 											return function(err) {
 												if (err) {
 													console.log(err);
-												}
-												
-												/*
-													Only when we have processed the last content spec and saved
-													every text file do we then create the keywords graph.
-												*/
-												--keywordSaveRequest;
-												if (cspIndex >= cspCount && topicRequest <= 0 && keywordSaveRequest <= 0) {
-													saveKeywords();
 												}
 											}
 									})(topic)); 
@@ -176,15 +161,7 @@ getContentSpecs = function() {
 						}
 					});
 				} else {				
-					
-					/*
-						The loop has been exited, and there are no more plain text save requests,
-						so generate the keywords.
-					*/
-					if (keywordSaveRequest <= 0 && topicRequest <= 0) {
-						saveKeywords();
-					}
-					
+
 					extraData.productFileNames = [];
 					
 					for (var product in productRsfData) {
