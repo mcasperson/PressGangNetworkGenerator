@@ -102,20 +102,12 @@ getContentSpecs = function() {
 											writeToFile();			
 										}
 									}
-							);
-							
-						} else {										
-							/*
-								Save the keywords if the last file to be processes was a key file, but
-								did not have any products assigned to it.
-							*/
-							if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
-								writeToFile();			
-							}	
+							);							
 						}
 					} else {										
 						/*
-							Save the keywords if the last file to be processed was not a key file.
+							Save the keywords if this is the last run through the loop and there are
+							no file loads
 						*/
 						if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
 							writeToFile();			
