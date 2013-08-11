@@ -7,6 +7,10 @@ rm /tmp/vis/*
 # Generate the layout files and dump the text
 node generate.js
 
+java -cp "/root/Maui1.2/lib/*:/root/Maui1.2/bin" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text
+
+node generateKeywords.js
+
 # Remove the backup files
 rm /var/www/html/visualizations/backup/*
 cp /var/www/html/visualizations/*.lay /var/www/html/visualizations/backup

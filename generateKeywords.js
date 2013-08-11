@@ -4,23 +4,6 @@ console.log("Extracting keywords");
 	The string that will hold the RSF data as it is built up
 */
 var keywordsRsf = "";
-
-/**
-	The function that saves the /tmp/vis/keywords.rsf file
-*/
-writeToFile = function() {
-	fs.writeFile(
-			"/tmp/vis/keywords.rsf", 
-			keywordsRsf, 
-			function(err) {
-				if(err) {
-					console.log(err);
-				} else {
-					console.log("The file /tmp/vis/keywords.rsf was saved!");
-				}
-			}
-		);	
-};
 	
 /*
 	Get all the files in the temp dir
@@ -83,5 +66,15 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 	} 											
 }
 
-writeToFile();	
+fs.writeFile(
+		"/tmp/vis/keywords.rsf", 
+		keywordsRsf, 
+		function(err) {
+			if(err) {
+				console.log(err);
+			} else {
+				console.log("The file /tmp/vis/keywords.rsf was saved!");
+			}
+		}
+	);		
 
