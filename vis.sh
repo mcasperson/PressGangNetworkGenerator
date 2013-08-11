@@ -26,7 +26,12 @@ cp /var/www/html/visualizations/*.rsf /var/www/html/visualizations/backup
 for f in /tmp/vis/*.rsf
 do
         echo Processing ${f}
-        /usr/java/latest/bin/java -cp CCVisu.jar org.sosy_lab.ccvisu.CCVisu -vertRepu -i ${f} -outformat LAY -dim 3 > ${f}.lay
+        if [ "$f" -eq "/tmp/keywords.rsf" ]
+        then    
+                /usr/java/latest/bin/java -cp CCVisu.jar org.sosy_lab.ccvisu.CCVisu -vertRepu -i ${f} -outformat LAY -dim 3 > ${f}.lay
+        else
+                /usr/java/latest/bin/java -cp CCVisu.jar org.sosy_lab.ccvisu.CCVisu -vertRepu -i ${f} -outformat LAY -dim 3 > ${f}.lay
+        fi
 done
 
 # copy the layouts
