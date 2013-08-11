@@ -70,8 +70,6 @@ getContentSpecs = function() {
 			{ 
 				console.log(stdout);						
 				
-				var filesProcessed = 0;
-				
 				/*
 					Get all the files in the temp dir
 				*/
@@ -98,72 +96,49 @@ getContentSpecs = function() {
 						var topicId = filename.substr(0, filename.length - 8);
 						
 						if (extraData[topicId]) {		
-							++filesProcessed;
-							fs.readFile(
-								"/tmp/vis/" + filename, 
-								'utf8', 
-								(function(myFilename) {
-									return function(err, data) {
-										if (!err) {											
-											
-											/*
-												Keyword files include a keyword on each line
-											*/
-											var keywords = data.split("\n");
-											
-											/*
-												Loop over ech keyword
-											*/
-											for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
-												
-												var keyword = keywords[keywordsIndex];
-												
-												/*
-													Loop over each product
-												*/
-												for (var productsIndex = 0, productsCount = extraData[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
-													
-													var product = extraData[topicId].products[productsIndex];
-												
-													if (keywordsRsf.length != 0) {
-														keywordsRsf += "\n";
-													}	
-													
-													/*
-														Link the product to the keyword
-													*/
-													keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
-												}
-											}
-										} else {
-											console.log(err);
-										}
-										
-										/*
-											If this was the last file to be read, create the rsf file
-										*/
-										--filesProcessed;
-										if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
-											writeToFile();			
-										}
-									}
-								})("/tmp/vis/" + filename)
-							);							
+							var data = fs.readFileSync("/tmp/vis/" + filename, 'utf8'); 
+			
+							/*
+								Keyword files include a keyword on each line
+							*/
+							var keywords = data.split("\n");
+							
+							/*
+								Loop over ech keyword
+							*/
+							for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
+								
+								var keyword = keywords[keywordsIndex];
+								
+								/*
+									Loop over each product
+								*/
+								for (var productsIndex = 0, productsCount = extraData[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
+									
+									var product = extraData[topicId].products[productsIndex];
+								
+									if (keywordsRsf.length != 0) {
+										keywordsRsf += "\n";
+									}	
+									
+									/*
+										Link the product to the keyword
+									*/
+									keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
+								}
+							}							
 						}
-					} 								
-						
-					/*
-						Save the keywords if this is the last run through the loop and there are
-						no file loads
-					*/
-					if (filenamesIndex >= filenamesCount - 1 && filesProcessed <= 0) {
-						writeToFile();			
-					}					
+					} 											
 				}
+				
+				writeToFile();	
 			}
 		);
 	}
 	
+	/*
+		Make a REST to to get the content specs in the system
+	*/
 	$.ajax({
 	  dataType: "json",
 	  url: contentSpecQueryURL + encodeURIComponent(JSON.stringify(queryExpand)),
@@ -178,6 +153,9 @@ getContentSpecs = function() {
 					
 					console.log("Processing content spec ID " + csp.item.id + ". " + (cspIndex/cspCount*100).toFixed(2) + "%");
 					
+					/*
+						Extract product, version and title information from the content spec
+					*/
 					var cspLines = csp.item.xml.split("\n");
 					
 					var product = "", version = "", title = "";
@@ -202,6 +180,9 @@ getContentSpecs = function() {
 						productVersionAndTitle = "[UNDEFINED]";
 					}
 					
+					/*
+						Keep a note of the product we encounter
+					*/
 					var found = false;
 					for (var productsIndex = 0, productsCount = extraData.products.length; productsIndex < productsCount; ++productsIndex) {
 						if (extraData.products[productsIndex] == productAndVersion) {
@@ -215,6 +196,9 @@ getContentSpecs = function() {
 					
 					++cspIndex;
 					
+					/*
+						Make a REST to to get the topics assigned to the content spec
+					*/
 					++topicRequest;					
 					$.ajax({
 						dataType: "json",
