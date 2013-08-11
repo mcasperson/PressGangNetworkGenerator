@@ -704,7 +704,9 @@
 						
 						var tableChild = document.createElement("div");
 						tableChild.innerText = visiableProduct + " [" + visiableProductRange + "%]";
-						tableChild.style.color = productColors[visiableProduct].getStyle();
+						if (productColors[visiableProduct]) {
+							tableChild.style.color = productColors[visiableProduct].getStyle();
+						}
 						myProductsList.push(tableChild);
 					}
 					
