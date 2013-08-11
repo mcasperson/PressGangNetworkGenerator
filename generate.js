@@ -211,63 +211,65 @@ getContentSpecs = function() {
 						"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
 						function (error, stdout, stderr) 
 						{ 
-							console.log(stdout);
+							console.log(stdout);						
 							
 							var filesProcessed = 0;
 							var filenames = fs.readdirSync("/tmp/vis/");
 							console.log("Found " + filenames.length + " files");
 							for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
+								++filesProcessed;
 								
-									var filename = filenames[filenamesIndex];									
-									if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
-										console.log("Processing " + filename);
-										
-										var topicId = filename.substr(0, filename.length - 8);
-										
-										++filesProcessed;
-										
-										if (extraData[topicId]) {																				
-											fs.readFile(
-												filename, 
-												'utf8', 
-												(function(myFilenamesIndex, myFilenamesCount) {
-													return function(err, data) {
-														if (!err) {
-															var keywords = data.split("\n");
+								var filename = filenames[filenamesIndex];									
+								if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
+									console.log("Processing " + filename);
+									
+									var topicId = filename.substr(0, filename.length - 8);
+
+									if (extraData[topicId]) {																				
+										fs.readFile(
+											filename, 
+											'utf8', 
+											(function(myFilenamesIndex, myFilenamesCount) {
+												return function(err, data) {
+													if (!err) {
+														var keywords = data.split("\n");
+														
+														for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
 															
-															for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
+															var keyword = keywords[keywordsIndex];
+															
+															for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
 																
-																var keyword = keywords[keywordsIndex];
-																
-																for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
-																	
-																	var product = extraData[topicId].products[productsIndex];
-																
-																	if (keywordsRsf.length != 0) {
-																		keywordsRsf += "\n";
-																	}		
-																	keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
-																}
+																var product = extraData[topicId].products[productsIndex];
+															
+																if (keywordsRsf.length != 0) {
+																	keywordsRsf += "\n";
+																}		
+																keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
 															}
 														}
-														
-														/*
-															If this was the last file to be read, create the rsf file
-														*/
-														if (filesProcessed >= myFilenamesCount - 1) {
-															saveKeywords();			
-														}
 													}
-												})(filenamesIndex, filenamesCount)
-											);
-											
-										} else {
-											
-											if (filesProcessed >= filenamesCount - 1) {
-												saveKeywords();			
-											}	
-										}
+													
+													/*
+														If this was the last file to be read, create the rsf file
+													*/
+													if (filesProcessed >= myFilenamesCount - 1) {
+														saveKeywords();			
+													}
+												}
+											})(filenamesIndex, filenamesCount)
+										);
+										
+									} else {										
+										if (filesProcessed >= filenamesCount - 1) {
+											saveKeywords();			
+										}	
 									}
+								} else {										
+									if (filesProcessed >= filenamesCount - 1) {
+										saveKeywords();			
+									}	
+								}
 							}
 						}
 					);					
