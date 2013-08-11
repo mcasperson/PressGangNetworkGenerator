@@ -149,6 +149,8 @@
 			
 			var projector = new THREE.Projector();
 			
+			var productColors = {};
+			
 			var filter = document.getElementById("filter");			
 			var optGroup = document.createElement('optgroup')
 			optGroup.label = "Products"
@@ -376,9 +378,7 @@
 				
 				var particleCount = displayedTopics.length;
 				
-				// Assign colours to products
-				var table = document.getElementById("table");
-				table.innerHTML = '';
+
 				
 				// Reset the colliders
 				colliders = [];
@@ -399,10 +399,10 @@
 					}
 				}
 				
-				var productColors = {};
+				productColors = {};
 				var majorColor = 32;
 				var minorColor = 1;
-				var productsList = [];
+				
 				for (var productIndex = 0, productCount = extraData.products.length; productIndex < productCount; ++productIndex) {
 						
 						var colour = new THREE.Color();
@@ -417,22 +417,6 @@
 						}
 						
 						productColors[extraData.products[productIndex]] = colour;
-						
-						if (displayedProducts[extraData.products[productIndex]]) {
-							var tableChild = document.createElement("div");
-							tableChild.innerText = extraData.products[productIndex];
-							tableChild.style.color = colour.getStyle();
-							productsList.push(tableChild);
-						}
-				}
-				productsList.sort(function(a,b) {
-					if (a.innerText < b.innerText) return -1;
-					if (a.innerText > b.innerText) return 1;
-					return 0;
-				});
-				
-				for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-					table.appendChild(productsList[productsListIndex]);
 				}
 
 				// Remove any existing systems
@@ -578,11 +562,67 @@
 
 			function render() {
 
-				/*var time = Date.now() * 0.001;
-				particleSystem.rotation.x = time * 0.25;
-				particleSystem.rotation.y = time * 0.5;*/
-				
+				listProductsInFrustum();
 				renderer.render( scene, camera );
+			}
+			
+			function listProductsInFrustum() {
+				var frustum = new THREE.Frustum;
+				frustum.setFromMatrix( new THREE.Matrix4().multiply( camera.projectionMatrix, camera.matrixWorldInverse ) );
+				
+				var visibleProducts = [];
+				
+				for (var collidersIndex = 0, collidersCount = colliders.length; collidersIndex < collidersCount; ++collidersIndex) {
+					var collisionSphere = colliders[collidersIndex];
+					if (extraData[collisionSphere.topic.id]) {						
+						if (frustum.intersectsSphere(collisionSphere)) {
+							var products;
+							if (layoutType == "producttopics")  {
+								products = extraData[collisionSphere.topic.id].productVersionAndTitles;
+							} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
+								products = extraData[collisionSphere.topic.id].products;
+							}
+							
+							for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
+								var product = products[productsIndex];
+								
+								var found = false;
+								for (var visibleProductsIndex = 0, visibleProductsCount = visibleProducts.length; visibleProductsIndex < visibleProductsCount; ++visibleProductsIndex) {
+									if (visibleProducts[visibleProductsIndex] == product) {
+										found = true;
+										break;
+									}
+								}
+								
+								if (!found) {
+									visibleProducts.push(product);
+								}
+							}
+						}
+					}
+				}
+				
+				// Assign colours to products
+				var table = document.getElementById("table");
+				table.innerHTML = '';
+				var productsList = [];
+				for (var visibleProductsIndex = 0, visibleProductsCount = visibleProducts.length; visibleProductsIndex < visibleProductsCount; ++visibleProductsIndex) {
+					var visiableProduct = visibleProducts[visibleProductsIndex];
+					var tableChild = document.createElement("div");
+					tableChild.innerText = visiableProduct;
+					tableChild.style.color = productColors[visiableProduct].getStyle();
+					productsList.push(tableChild);
+				}
+				
+				productsList.sort(function(a,b) {
+					if (a.innerText < b.innerText) return -1;
+					if (a.innerText > b.innerText) return 1;
+					return 0;
+				});
+				
+				for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+					table.appendChild(productsList[productsListIndex]);
+				}
 			}
 
 		</script>
