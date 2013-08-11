@@ -56,6 +56,22 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 					
 					var product = extraData[topicId].products[productsIndex];
 				
+					if (!extraData[keyword]) {
+						extraData[keyword] = {products: [product]};
+					} else {
+						var found = false;
+						for (var productsIndex = 0, productsCount = extraData[keyword].products.length; productsIndex < productsCount; ++productsIndex) {
+							if (extraData[keyword].products[productsIndex] == product) {
+								found = true;
+								break;
+							}
+						}
+						
+						if (!found) {
+							extraData[keyword].products.push(product);								
+						}
+					}
+				
 					if (keywordsRsf.length != 0) {
 						keywordsRsf += "\n";
 					}	
