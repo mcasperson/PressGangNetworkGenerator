@@ -1,4 +1,5 @@
-require('/tmp/vis/extradata.js')
+require('/tmp/vis/extradata.js');
+var fs = require('fs');
 
 console.log("Extracting keywords");
 		

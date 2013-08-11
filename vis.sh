@@ -7,8 +7,12 @@ rm /tmp/vis/*
 # Generate the layout files and dump the text
 node generate.js
 
+# Generate the keywords
+pushd /root/Maui1.2
 java -cp "/root/Maui1.2/lib/*:/root/Maui1.2/bin" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text
+popd
 
+# Generate the keyword graph
 node generateKeywords.js
 
 # Remove the backup files
