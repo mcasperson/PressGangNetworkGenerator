@@ -217,7 +217,7 @@ getContentSpecs = function() {
 							var filenames = fs.readdirSync("/tmp/vis/");
 							console.log("Found " + filenames.length + " files");
 							for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
-								++filesProcessed;
+								
 								
 								var filename = filenames[filenamesIndex];									
 								if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
@@ -253,6 +253,7 @@ getContentSpecs = function() {
 													/*
 														If this was the last file to be read, create the rsf file
 													*/
+													++filesProcessed;
 													if (filesProcessed >= myFilenamesCount - 1) {
 														saveKeywords();			
 													}
@@ -261,11 +262,20 @@ getContentSpecs = function() {
 										);
 										
 									} else {										
+										/*
+											Save the keywords if the last file to be processes was a key file, but
+											did not have any products assigned to it.
+										*/
+										++filesProcessed;
 										if (filesProcessed >= filenamesCount - 1) {
 											saveKeywords();			
 										}	
 									}
 								} else {										
+									/*
+										Save the keywords if the last file to be processed was not a key file.
+									*/
+									++filesProcessed;
 									if (filesProcessed >= filenamesCount - 1) {
 										saveKeywords();			
 									}	
