@@ -69,7 +69,7 @@
 				<option value="3">More than 5 Products</option>
 			</optgroup>
 			<optgroup label="Keywords">
-				<option value="keywords2.rsf.lay">All Topics</option>
+				<option value="keywords.rsf.lay">All Topics</option>
 			</optgroup>
 		</select>
 		<div id="table" class="productTable"></div>
@@ -297,7 +297,11 @@
 							if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
 								var topicDetails = lines[lineIndex].split("\t");
 								if (topicDetails.length == 8) {
-									productTopics.push({id: topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+									if (selectedFilter == "keywords.rsf.lay") {
+										productTopics.push({id: "Keyword:" + topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+									} else {
+										productTopics.push({id: topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+									}
 								}
 							}
 						}
