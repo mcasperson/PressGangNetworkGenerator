@@ -1,3 +1,5 @@
+require('/tmp/vis/extradata.js')
+
 console.log("Extracting keywords");
 		
 /*
@@ -10,6 +12,7 @@ var keywordsRsf = "";
 */
 var filenames = fs.readdirSync("/tmp/vis/");
 console.log("Found " + filenames.length + " files");
+
 
 /*
 	Loop over the files
