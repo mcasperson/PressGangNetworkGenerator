@@ -168,6 +168,7 @@ getContentSpecs = function() {
 					
 					++cspIndex;
 					
+					++keywordSaveRequest;
 					$.ajax({
 						dataType: "json",
 						url: topicsInContentSpec.replace("#CSPID#", csp.item.id) + encodeURIComponent(JSON.stringify(queryExpand)),
@@ -177,17 +178,14 @@ getContentSpecs = function() {
 								
 								/*
 									Write out the topic's XML as text
-								*/			
-								++keywordSaveRequest;
+								*/											
 								fs.writeFile(
 										"/tmp/vis/" + topic.item.id + ".xml.txt", 
 										topic.item.xml == null ? "" : topic.item.xml.replace(/<.*?>/g, " "), 
 										(function(saveTopic) {
 											return function(err) {
-												if(err) {
+												if (err) {
 													console.log(err);
-												} else {
-													console.log("/tmp/vis/" + saveTopic.item.id + ".xml.txt");
 												}
 												
 												/*
