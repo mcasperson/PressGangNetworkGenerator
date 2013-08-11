@@ -31,13 +31,22 @@ getContentSpecs = function() {
 	
 	console.log("Getting content spec IDs");
 	
+	/**
+		Calls the Maui keyword extraction tool, loops over the resulting .key files and
+		creates a graph linking the product that included the topic to the keyword in a file
+		called /tmp/vis/keywords.rsf.
+	*/
 	saveKeywords = function() {
-		/*
-			Extract the key words
-		*/	
 		console.log("Extracting keywords");
 		
+		/*
+			The string that will hold the RSF data as it is built up
+		*/
 		var keywordsRsf = "";
+		
+		/**
+			The function that saves the /tmp/vis/keywords.rsf file
+		*/
 		writeToFile = function() {
 			fs.writeFile(
 					"/tmp/vis/keywords.rsf", 
@@ -52,6 +61,9 @@ getContentSpecs = function() {
 				);	
 		};
 		
+		/*
+			Call Maui to generate the key files
+		*/
 		exec(
 			"java -cp \"/root/Maui1.2/lib/*:/root/Maui1.2/bin\" maui.main.MauiTopicExtractor -l /tmp/vis -m /root/Maui1.2/RedHat -f text", 
 			function (error, stdout, stderr) 
@@ -59,11 +71,23 @@ getContentSpecs = function() {
 				console.log(stdout);						
 				
 				var filesProcessed = 0;
+				
+				/*
+					Get all the files in the temp dir
+				*/
 				var filenames = fs.readdirSync("/tmp/vis/");
 				console.log("Found " + filenames.length + " files");
+				
+				/*
+					Loop over the files
+				*/
 				for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex < filenamesCount; ++filenamesIndex) {
 
 					var filename = filenames[filenamesIndex];									
+					
+					/*
+						We are only interested in the .key files
+					*/
 					if (filename.length > 4 && filename.substr(filename.length - 4, 4) == ".key") {
 						console.log("Processing " + filename);
 						
@@ -72,10 +96,11 @@ getContentSpecs = function() {
 						if (extraData[topicId]) {		
 							++filesProcessed;
 							fs.readFile(
-								filename, 
+								"/tmp/vis/" + filename, 
 								'utf8', 
-								function(err, data) {
-										if (!err) {
+								(function(myFilename) {
+									return function(err, data) {
+										if (!err) {											
 											var keywords = data.split("\n");
 											
 											for (var keywordsIndex = 0, keywordsCount = keywords.length; keywordsIndex < keywordsCount; ++keywords) {													
@@ -92,6 +117,8 @@ getContentSpecs = function() {
 													keywordsRsf += "KEYWORD \"" + product + "\ \"" + keyword + "\""; 
 												}
 											}
+										} else {
+											console.log(err);
 										}
 										
 										/*
@@ -102,6 +129,7 @@ getContentSpecs = function() {
 											writeToFile();			
 										}
 									}
+								})("/tmp/vis/" + filename)
 							);							
 						}
 					} 								
