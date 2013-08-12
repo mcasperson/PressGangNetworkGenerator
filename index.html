@@ -67,6 +67,7 @@
 				<option value="1">More than 2 Products</option>
 				<option value="2">More than 3 Products</option>
 				<option value="3">More than 5 Products</option>
+				<option value="4">New Bugzilla Bugs</option>
 			</optgroup>
 			<optgroup label="Keywords">
 				<option value="keywords.rsf.lay">All Topics</option>
@@ -275,7 +276,7 @@
 					layoutType = "topics";
 					
 					createParticles();
-				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3") {
+				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3" || selectedFilter == "4") {
 					filteredTopics = [];					
 					layoutType = "filteredtopics";
 					
@@ -294,10 +295,24 @@
 							if (extraData[topic.id] && extraData[topic.id].products.length >= 5) {
 								filteredTopics.push(topic);
 							}
-						} 
+						} else if (selectedFilter == "4") {
+							if (extraData[topic.id]) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCounts; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "NEW") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						}
 					}
 					
-					createParticles();
+					createParticles();				
 				} else {	
 					productTopics = [];
 					$.ajax({
