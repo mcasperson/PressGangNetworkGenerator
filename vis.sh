@@ -4,6 +4,9 @@ cd /root/PressGangNetworkGenerator
 mkdir /tmp/vis
 rm /tmp/vis/*
 
+# get the bugzilla details
+psql -c "SELECT bug_id, bug_status, bug_severity, creation_ts, cf_build_id FROM BugzillaS.bugs WHERE bugs.cf_build_id LIKE '%-% __ ___ ____ __:__%'" -d EngVDBF -p 35432 -h vdb.engineering.redhat.com -U teiid -F"," -t -A > /tmp/vis/bugzilla.csv
+
 # Generate the layout files and dump the text
 node generate.js
 
