@@ -19,7 +19,7 @@ finished = function(data) {
 
 getBugzillaData = function() {
 	var data = fs.readFileSync("/tmp/vis/bugzilla.csv", 'utf8'); 
-	var lines = data.split("/n");
+	var lines = data.split("\n");
 	for (var linesIndex = 0, linesCount = lines.length; linesIndex < linesCount; ++linesIndex) {
 		var columns = lines[linesIndex].split(",");
 		if (columns.length == 5) {			
