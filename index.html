@@ -68,6 +68,11 @@
 				<option value="2">More than 3 Products</option>
 				<option value="3">More than 5 Products</option>
 				<option value="4">New Bugzilla Bugs</option>
+				<option value="5">Assigned Bugzilla Bugs</option>
+				<option value="6">Resolved Bugzilla Bugs</option>
+				<option value="7">Verified Bugzilla Bugs</option>
+				<option value="8">On QA Bugzilla Bugs</option>
+				<option value="9">Closed Bugzilla Bugs</option>
 			</optgroup>
 			<optgroup label="Keywords">
 				<option value="keywords.rsf.lay">All Topics</option>
@@ -276,7 +281,7 @@
 					layoutType = "topics";
 					
 					createParticles();
-				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3" || selectedFilter == "4") {
+				} else if (selectedFilter >= "1" && selectedFilter <= "9") {
 					filteredTopics = [];					
 					layoutType = "filteredtopics";
 					
@@ -298,8 +303,78 @@
 						} else if (selectedFilter == "4") {
 							if (extraData[topic.id] && extraData[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCounts; ++bugsIndex) {
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
 									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "NEW") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						} else if (selectedFilter == "5") {
+							if (extraData[topic.id] && extraData[topic.id].bugs) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "ASSIGNED") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						} else if (selectedFilter == "6") {
+							if (extraData[topic.id] && extraData[topic.id].bugs) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "RESOLVED") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						} else if (selectedFilter == "7") {
+							if (extraData[topic.id] && extraData[topic.id].bugs) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "VERIFIED") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						} else if (selectedFilter == "8") {
+							if (extraData[topic.id] && extraData[topic.id].bugs) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "ON_QA") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						} else if (selectedFilter == "9") {
+							if (extraData[topic.id] && extraData[topic.id].bugs) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "CLOSED") {
 										found = true;
 										break;
 									}
