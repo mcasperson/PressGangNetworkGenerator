@@ -734,7 +734,7 @@
 						var visiableProductRange = (100 - ((visiableProductDistance - smallestDistance) / range * 100)).toFixed(2);
 						
 						var tableChild = document.createElement("div");
-						tableChild.innerText = visiableProduct + " [" + visiableProductRange + "%]";
+						tableChild.textContent  = visiableProduct + " [" + visiableProductRange + "%]";
 						if (productColors[visiableProduct]) {
 							tableChild.style.color = productColors[visiableProduct].getStyle();
 						}
