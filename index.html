@@ -67,6 +67,7 @@
 				<option value="1">More than 2 Products</option>
 				<option value="2">More than 3 Products</option>
 				<option value="3">More than 5 Products</option>
+				<option value="4">New Bugzilla Bugs</option>
 			</optgroup>
 			<optgroup label="Keywords">
 				<option value="keywords.rsf.lay">All Topics</option>
@@ -148,6 +149,10 @@
 			var colliders = [];
 			
 			var projector = new THREE.Projector();
+			
+			var productColors = {};
+			
+			var productsList = [];
 			
 			var filter = document.getElementById("filter");			
 			var optGroup = document.createElement('optgroup')
@@ -271,7 +276,7 @@
 					layoutType = "topics";
 					
 					createParticles();
-				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3") {
+				} else if (selectedFilter == "1" || selectedFilter == "2" || selectedFilter == "3" || selectedFilter == "4") {
 					filteredTopics = [];					
 					layoutType = "filteredtopics";
 					
@@ -290,10 +295,24 @@
 							if (extraData[topic.id] && extraData[topic.id].products.length >= 5) {
 								filteredTopics.push(topic);
 							}
-						} 
+						} else if (selectedFilter == "4") {
+							if (extraData[topic.id]) {
+								var found = false;
+								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCounts; ++bugsIndex) {
+									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "NEW") {
+										found = true;
+										break;
+									}
+								}
+								
+								if (found) {
+									filteredTopics.push(topic);								
+								}
+							}
+						}
 					}
 					
-					createParticles();
+					createParticles();				
 				} else {	
 					productTopics = [];
 					$.ajax({
@@ -376,9 +395,7 @@
 				
 				var particleCount = displayedTopics.length;
 				
-				// Assign colours to products
-				var table = document.getElementById("table");
-				table.innerHTML = '';
+
 				
 				// Reset the colliders
 				colliders = [];
@@ -399,10 +416,10 @@
 					}
 				}
 				
-				var productColors = {};
+				productColors = {};
 				var majorColor = 32;
 				var minorColor = 1;
-				var productsList = [];
+				
 				for (var productIndex = 0, productCount = extraData.products.length; productIndex < productCount; ++productIndex) {
 						
 						var colour = new THREE.Color();
@@ -417,22 +434,6 @@
 						}
 						
 						productColors[extraData.products[productIndex]] = colour;
-						
-						if (displayedProducts[extraData.products[productIndex]]) {
-							var tableChild = document.createElement("div");
-							tableChild.innerText = extraData.products[productIndex];
-							tableChild.style.color = colour.getStyle();
-							productsList.push(tableChild);
-						}
-				}
-				productsList.sort(function(a,b) {
-					if (a.innerText < b.innerText) return -1;
-					if (a.innerText > b.innerText) return 1;
-					return 0;
-				});
-				
-				for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
-					table.appendChild(productsList[productsListIndex]);
 				}
 
 				// Remove any existing systems
@@ -576,13 +577,117 @@
 				render();
 			}
 
-			function render() {
-
-				/*var time = Date.now() * 0.001;
-				particleSystem.rotation.x = time * 0.25;
-				particleSystem.rotation.y = time * 0.5;*/
-				
+			function render() {				
+				listProductsInFrustum();
 				renderer.render( scene, camera );
+			}			
+			
+			function bySortedValueAndReturn(obj) {
+				var tuples = [];
+
+				for (var key in obj) tuples.push([key, obj[key]]);
+
+				tuples.sort(function(a, b) { return a[1].weightedDistFromCamera < b[1].weightedDistFromCamera ? -1 : a[1].weightedDistFromCamera > b[1].weightedDistFromCamera ? 1 : 0 });
+				
+				return tuples;
+			}
+			
+			/**
+				Displays a list of products that fall within the cameras view, and sorts the list so the products with the closest
+				nodes are listed at the top.
+			*/
+			function listProductsInFrustum() {
+				var frustum = new THREE.Frustum;
+				frustum.setFromMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
+				
+				var productDistances = {};
+				
+				for (var collidersIndex = 0, collidersCount = colliders.length; collidersIndex < collidersCount; ++collidersIndex) {
+					var collisionSphere = colliders[collidersIndex];
+					if (extraData[collisionSphere.topic.id]) {						
+						if (frustum.intersectsSphere(collisionSphere)) {
+							var products;
+							if (layoutType == "producttopics")  {
+								products = extraData[collisionSphere.topic.id].productVersionAndTitles;
+							} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
+								products = extraData[collisionSphere.topic.id].products;
+							}
+
+							var distFromCamera = camera.position.distanceToSquared(collisionSphere.center);
+				
+							for (var productsIndex = 0, productsCount = products.length; productsIndex < productsCount; ++productsIndex) {
+								var product = products[productsIndex];
+								if (!productDistances[product]) {
+									productDistances[product] = {distFromCamera: distFromCamera, count: 1, weightedCount: 0};
+								} else {
+									productDistances[product].distFromCamera += distFromCamera;
+									productDistances[product].count += 1;
+								}
+								
+								/*
+									This is used to weight products that have topics close to the camera.
+								*/
+								if (distFromCamera < 20000) {
+									productDistances[product].weightedCount += 1;
+								}
+							}
+						}
+					}
+				}
+				
+				for (var key in productDistances) productDistances[key].averageDistFromCamera = productDistances[key].distFromCamera / productDistances[key].count;
+				
+				/*
+					Every topic close to the camera reduces the weighted distance.
+				*/
+				for (var key in productDistances) productDistances[key].weightedDistFromCamera = productDistances[key].averageDistFromCamera - (productDistances[key].weightedCount * 5000);
+				
+				var sorted = bySortedValueAndReturn(productDistances);
+				
+				var table = document.getElementById("table");
+				
+				if (sorted.length != 0 && (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords"))	{
+					var smallestDistance = sorted[0][1].weightedDistFromCamera;
+					var largestDistance = sorted[sorted.length - 1][1].weightedDistFromCamera;
+					var range = largestDistance - smallestDistance;
+									
+					var myProductsList = [];
+					for (var sortedIndex = 0, sortedCount = sorted.length; sortedIndex < sortedCount; ++sortedIndex) {
+						var visiableProduct = sorted[sortedIndex][0];
+						var visiableProductDistance = sorted[sortedIndex][1].weightedDistFromCamera;
+						
+						var visiableProductRange = (100 - ((visiableProductDistance - smallestDistance) / range * 100)).toFixed(2);
+						
+						var tableChild = document.createElement("div");
+						tableChild.innerText = visiableProduct + " [" + visiableProductRange + "%]";
+						if (productColors[visiableProduct]) {
+							tableChild.style.color = productColors[visiableProduct].getStyle();
+						}
+						myProductsList.push(tableChild);
+					}
+					
+					var changes = false;
+					if (productsList.length != myProductsList.length) {
+						changes = true;
+					} else {
+						for (var productsListIndex = 0, productsListCount = productsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+							if (productsList[productsListIndex] != myProductsList[productsListIndex]) {
+								changes = true;
+								break;
+							}
+						}
+					}
+
+					if (changes) {						
+						table.innerHTML = '';
+						for (var productsListIndex = 0, productsListCount = myProductsList.length; productsListIndex < productsListCount; ++productsListIndex) {
+							table.appendChild(myProductsList[productsListIndex]);
+						}					
+						productList = myProductsList;
+					}
+				} else {
+					table.innerHTML = '';
+				}
 			}
 
 		</script>

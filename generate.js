@@ -1,9 +1,39 @@
 var $ = require('jquery');
 var fs = require('fs');
+
+var rsfData = "";
+var productRsfData = {};
+var extraData = {};
+extraData.products = [];
+
+var bugs = {};
+
+var productRe = /Product\s*=\s*(.*?)\s*$/;
+var versionRe = /Version\s*=\s*(.*?)\s*$/;
+var titleRe = /Title\s*=\s*(.*?)\s*$/;
+var bugzillaTopicDetails = /(\d+)-\d+ \d{2} \w{3} \d{4} \d{2}:\d{2}/;
 						
 finished = function(data) {
 	console.log(JSON.stringify(data));
 }		
+
+getBugzillaData = function() {
+	var data = fs.readFileSync("/tmp/vis/bugzilla.csv", 'utf8'); 
+	var lines = data.split("/n");
+	for (var linesIndex = 0, linesCount = lines.length; linesIndex < linesCount; ++linesIndex) {
+		var columns = lines[linesIndex].split(",");
+		if (columns.length == 5) {			
+			var match = bugzillaTopicDetails.exec(columns[4]);
+			if (match != null) {
+				if (!bugs[match[1]]) {
+					bugs[match[1]] = [{bugzillaId: columns[0], bugzillaStatus: columns[1]}];
+				} else {
+					bugs[match[1]].push({bugzillaId: columns[0], bugzillaStatus: columns[1]});
+				}
+			}
+		}
+	}
+}
 
 getContentSpecs = function() {
 	var contentSpecQueryURL = "http://skynet.usersys.redhat.com:8080/pressgang-ccms/rest/1/topics/get/json/query;tag268=1;logic=And?expand=";
@@ -18,15 +48,6 @@ getContentSpecs = function() {
 			}
 		]
 	};
-	
-	var rsfData = "";
-	var productRsfData = {};
-	var extraData = {};
-	extraData.products = [];
-	
-	var productRe = /Product\s*=\s*(.*?)\s*$/;
-	var versionRe = /Version\s*=\s*(.*?)\s*$/;
-	var titleRe = /Title\s*=\s*(.*?)\s*$/;
 	
 	console.log("Getting content spec IDs");
 	
@@ -140,6 +161,13 @@ getContentSpecs = function() {
 									}
 								}
 								
+								/*
+									Assign the bugs
+								*/
+								if (bugs[topic.item.id]) {
+									extraData[topic.item.id].bugs = bugs[topic.item.id];
+								}
+								
 								if (rsfData.length != 0) {
 									rsfData += "\n";
 								}
@@ -205,4 +233,5 @@ getContentSpecs = function() {
 	});
 }
 
+getBugzillaData();
 getContentSpecs();
