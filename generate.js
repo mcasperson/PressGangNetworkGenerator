@@ -5,6 +5,8 @@ var rsfData = "";
 var productRsfData = {};
 var extraData = {};
 extraData.products = [];
+extraData.topics = {};
+extraData.keywords = {};
 
 var bugs = {};
 
@@ -12,6 +14,7 @@ var productRe = /Product\s*=\s*(.*?)\s*$/;
 var versionRe = /Version\s*=\s*(.*?)\s*$/;
 var titleRe = /Title\s*=\s*(.*?)\s*$/;
 var bugzillaTopicDetails = /(\d+)-\d+ \d{2} \w{3} \d{4} \d{2}:\d{2}/;
+var xmlElementRe = /<\S+?.*?\/?>/g;
 						
 finished = function(data) {
 	console.log(JSON.stringify(data));
@@ -132,40 +135,51 @@ getContentSpecs = function() {
 												}
 											}
 									})(topic)); 
-								
-								if (!extraData[topic.item.id]) {
-									extraData[topic.item.id] = {products: [productAndVersion], productVersionAndTitles: [productVersionAndTitle]};
+
+								if (!extraData.topics[topic.item.id]) {
+									extraData.topics[topic.item.id] = {products: [productAndVersion], productVersionAndTitles: [productVersionAndTitle], xmlElements:{}};
 								} else {
 									var found = false;
-									for (var productsIndex = 0, productsCount = extraData[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
-										if (extraData[topic.item.id].products[productsIndex] == productAndVersion) {
+									for (var productsIndex = 0, productsCount = extraData.topics[topic.item.id].products.length; productsIndex < productsCount; ++productsIndex) {
+										if (extraData.topics[topic.item.id].products[productsIndex] == productAndVersion) {
 											found = true;
 											break;
 										}
 									}
 									
 									if (!found) {
-										extraData[topic.item.id].products.push(productAndVersion);								
+										extraData.topics[topic.item.id].products.push(productAndVersion);								
 									}
 									
 									var found = false;
-									for (var productsIndex = 0, productsCount = extraData[topic.item.id].productVersionAndTitles.length; productsIndex < productsCount; ++productsIndex) {
-										if (extraData[topic.item.id].productVersionAndTitles[productsIndex] == productVersionAndTitle) {
+									for (var productsIndex = 0, productsCount = extraData.topics[topic.item.id].productVersionAndTitles.length; productsIndex < productsCount; ++productsIndex) {
+										if (extraData.topics[topic.item.id].productVersionAndTitles[productsIndex] == productVersionAndTitle) {
 											found = true;
 											break;
 										}
 									}
 									
 									if (!found) {
-										extraData[topic.item.id].productVersionAndTitles.push(productVersionAndTitle);								
+										extraData.topics[topic.item.id].productVersionAndTitles.push(productVersionAndTitle);								
 									}
 								}
-								
+
+								/*
+									Assign the xml tags used by the topic
+								*/
+								while (match = xmlElementRe.exec(topic.item.xml)) {
+									if (!extraData.topics[topic.item.id].xmlElements[match[1]] ) {
+										extraData.topics[topic.item.id].xmlElements[match[1]] = 1;
+									} else {
+										extraData.topics[topic.item.id].xmlElements[match[1]] += 1;
+									}
+								}													
+											
 								/*
 									Assign the bugs
 								*/
 								if (bugs[topic.item.id]) {
-									extraData[topic.item.id].bugs = bugs[topic.item.id];
+									extraData.topics[topic.item.id].bugs = bugs[topic.item.id];
 								}
 								
 								if (rsfData.length != 0) {
@@ -223,6 +237,7 @@ getContentSpecs = function() {
 							console.log("The file /tmp/vis/extradata.js was saved!");
 						}
 					});
+					
 					
 										
 				}

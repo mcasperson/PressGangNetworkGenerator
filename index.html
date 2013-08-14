@@ -194,7 +194,7 @@
 					if (lines[lineIndex].lenth != 0 && lines[lineIndex].substr(0, 1) != "#") {
 						var topicDetails = lines[lineIndex].split("\t");
 						if (topicDetails.length == 8) {
-							topics.push({id: Number(topicDetails[5]), x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
+							topics.push({id: topicDetails[5], x: Number(topicDetails[1]), y: Number(topicDetails[2]), z: Number(topicDetails[3]), size: Number(topicDetails[4])});
 						}
 					}
 				}
@@ -246,13 +246,13 @@
 					selected.className = "selected";
 					selected.id = "selected";
 					var selectedText = "Topic ID: " + closestCollision.topic.id + "<br/>Products: ";
-					if (extraData[closestCollision.topic.id]) {
+					if (extraData.topics[closestCollision.topic.id]) {
 
 						var products;
 						if (layoutType == "producttopics")  {
-							products = extraData[closestCollision.topic.id].productVersionAndTitles;
+							products = extraData.topics[closestCollision.topic.id].productVersionAndTitles;
 						} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
-							products = extraData[closestCollision.topic.id].products;
+							products = extraData.topics[closestCollision.topic.id].products;
 						}
 							
 						if (products) {
@@ -289,22 +289,22 @@
 						var topic = topics[topicIndex];
 						
 						if (selectedFilter == "1") {
-							if (extraData[topic.id] && extraData[topic.id].products.length >= 2) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].products.length >= 2) {
 								filteredTopics.push(topic);
 							}
 						} else if (selectedFilter == "2") {
-							if (extraData[topic.id] && extraData[topic.id].products.length >= 3) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].products.length >= 3) {
 								filteredTopics.push(topic);
 							}
 						} else if (selectedFilter == "3") {
-							if (extraData[topic.id] && extraData[topic.id].products.length >= 5) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].products.length >= 5) {
 								filteredTopics.push(topic);
 							}
 						} else if (selectedFilter == "4") {
-							if (extraData[topic.id] && extraData[topic.id].bugs) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
-									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "NEW") {
+								for (var bugsIndex = 0, bugsCount = extraData.topics[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "NEW") {
 										found = true;
 										break;
 									}
@@ -315,10 +315,10 @@
 								}
 							}
 						} else if (selectedFilter == "5") {
-							if (extraData[topic.id] && extraData[topic.id].bugs) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
 								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
-									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "ASSIGNED") {
+									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "ASSIGNED") {
 										found = true;
 										break;
 									}
@@ -329,10 +329,10 @@
 								}
 							}
 						} else if (selectedFilter == "6") {
-							if (extraData[topic.id] && extraData[topic.id].bugs) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
 								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
-									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "RESOLVED") {
+									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "RESOLVED") {
 										found = true;
 										break;
 									}
@@ -343,10 +343,10 @@
 								}
 							}
 						} else if (selectedFilter == "7") {
-							if (extraData[topic.id] && extraData[topic.id].bugs) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
-									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "VERIFIED") {
+								for (var bugsIndex = 0, bugsCount = extraData.topics[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "VERIFIED") {
 										found = true;
 										break;
 									}
@@ -357,10 +357,10 @@
 								}
 							}
 						} else if (selectedFilter == "8") {
-							if (extraData[topic.id] && extraData[topic.id].bugs) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
 								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
-									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "ON_QA") {
+									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "ON_QA") {
 										found = true;
 										break;
 									}
@@ -371,10 +371,10 @@
 								}
 							}
 						} else if (selectedFilter == "9") {
-							if (extraData[topic.id] && extraData[topic.id].bugs) {
+							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
 								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
-									if (extraData[topic.id].bugs[bugsIndex].bugzillaStatus == "CLOSED") {
+									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "CLOSED") {
 										found = true;
 										break;
 									}
@@ -478,8 +478,14 @@
 				var displayedProducts = {};
 				// find which products are being displayed
 				for(var p = 0; p < particleCount; p++) {
-					if (extraData[displayedTopics[p].id]) {
-						var products = extraData[displayedTopics[p].id].products;
+					if (extraData.topics[displayedTopics[p].id]) {
+						var products;
+						if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "producttopics") {
+							products = extraData.topics[displayedTopics[p].id].products;
+						} else if (layoutType == "keywords") {
+							products = extraData.keywords[displayedTopics[p].id].products;
+						}
+						
 						// this will be null if the products have not be assigned (like with keywords)
 						if (products) {
 							for (var topicProductIndex = 0, topicProductCount = products.length; topicProductIndex < topicProductCount; ++topicProductIndex) {
@@ -566,8 +572,8 @@
 							
 							values_color[ p % maxVerts ] = new THREE.Color();
 							
-							if (extraData[displayedTopics[p].id]) {
-								var products = extraData[displayedTopics[p].id].products;
+							if (extraData.topics[displayedTopics[p].id]) {
+								var products = extraData.topics[displayedTopics[p].id].products;
 								// this will be null if the products have not be assigned (like with keywords)
 								if (products) {
 									var r = 0, g = 0, b = 0;
@@ -679,13 +685,15 @@
 				
 				for (var collidersIndex = 0, collidersCount = colliders.length; collidersIndex < collidersCount; ++collidersIndex) {
 					var collisionSphere = colliders[collidersIndex];
-					if (extraData[collisionSphere.topic.id]) {						
+					if (extraData.topics[collisionSphere.topic.id]) {						
 						if (frustum.intersectsSphere(collisionSphere)) {
 							var products;
 							if (layoutType == "producttopics")  {
-								products = extraData[collisionSphere.topic.id].productVersionAndTitles;
-							} else if (layoutType == "topics" || layoutType == "filteredtopics" || layoutType == "keywords") {
-								products = extraData[collisionSphere.topic.id].products;
+								products = extraData.topics[collisionSphere.topic.id].productVersionAndTitles;
+							} else if (layoutType == "topics" || layoutType == "filteredtopics") {
+								products = extraData.topics[collisionSphere.topic.id].products;
+							} else if (layoutType == "keywords") {
+								products = extraData.keywords[collisionSphere.topic.id].products;
 							}
 
 							var distFromCamera = camera.position.distanceToSquared(collisionSphere.center);

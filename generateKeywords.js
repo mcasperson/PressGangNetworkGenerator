@@ -34,7 +34,7 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 		*/
 		var topicId = filename.substr(0, filename.length - 8);
 		
-		if (extraData[topicId]) {		
+		if (extraData.topics[topicId]) {		
 			var data = fs.readFileSync("/tmp/vis/" + filename, 'utf8'); 
 
 			/*
@@ -52,23 +52,23 @@ for (var filenamesIndex = 0, filenamesCount = filenames.length; filenamesIndex <
 				/*
 					Loop over each product
 				*/
-				for (var productsIndex = 0, productsCount = extraData[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
+				for (var productsIndex = 0, productsCount = extraData.topics[topicId].products.length; productsIndex < productsCount; ++productsIndex) {
 					
-					var product = extraData[topicId].products[productsIndex];
+					var product = extraData.topics[topicId].products[productsIndex];
 				
-					if (!extraData["Keyword:" + keyword]) {
-						extraData["Keyword:" + keyword] = {products: [product]};
+					if (!extraData.keywords[keyword]) {
+						extraData.keywords[keyword] = {products: [product]};
 					} else {
 						var found = false;
-						for (var topicProductsIndex = 0, topicProductsCount = extraData["Keyword:" + keyword].products.length; topicProductsIndex < topicProductsCount; ++topicProductsIndex) {
-							if (extraData["Keyword:" + keyword].products[topicProductsIndex] == product) {
+						for (var topicProductsIndex = 0, topicProductsCount = extraData.keywords[keyword].products.length; topicProductsIndex < topicProductsCount; ++topicProductsIndex) {
+							if (extraData.keywords[keyword].products[topicProductsIndex] == product) {
 								found = true;
 								break;
 							}
 						}
 						
 						if (!found) {
-							extraData["Keyword:" + keyword].products.push(product);								
+							extraData.keywords[keyword].products.push(product);								
 						}
 					}
 				
