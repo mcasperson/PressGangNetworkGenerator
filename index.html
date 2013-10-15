@@ -317,7 +317,7 @@
 						} else if (selectedFilter == "5") {
 							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+								for (var bugsIndex = 0, bugsCount = extraData.topics[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
 									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "ASSIGNED") {
 										found = true;
 										break;
@@ -331,7 +331,7 @@
 						} else if (selectedFilter == "6") {
 							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+								for (var bugsIndex = 0, bugsCount = extraData.topics[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
 									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "RESOLVED") {
 										found = true;
 										break;
@@ -359,7 +359,7 @@
 						} else if (selectedFilter == "8") {
 							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+								for (var bugsIndex = 0, bugsCount = extraData.topics[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
 									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "ON_QA") {
 										found = true;
 										break;
@@ -373,7 +373,7 @@
 						} else if (selectedFilter == "9") {
 							if (extraData.topics[topic.id] && extraData.topics[topic.id].bugs) {
 								var found = false;
-								for (var bugsIndex = 0, bugsCount = extraData[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
+								for (var bugsIndex = 0, bugsCount = extraData.topics[topic.id].bugs.length; bugsIndex < bugsCount; ++bugsIndex) {
 									if (extraData.topics[topic.id].bugs[bugsIndex].bugzillaStatus == "CLOSED") {
 										found = true;
 										break;
